@@ -1,0 +1,1597 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-fs="2">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 知识全景： 从概念到工程落地的一条主线</title>
+<meta name="description" content="把散落在论文、课程和博客里的名词接成一张能走通的地图：每个概念先回答“它解决什么问题”，再交代它的代价与边界，最后落到工程上怎么做、怎么评、怎么不翻车。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23153A2F'/><path d='M7 24L16 8l9 16M11 20h10' stroke='%23F2F3EF' stroke-width='2' fill='none'/></svg>">
+<link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+:root{--accent:#1F4D3F;--accent-deep:#153A2F;--accent-wash:#E2EBE5}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+:root{
+  --paper:#F2F3EF;
+  --paper-2:#E9EBE4;
+  --surface:#FFFFFF;
+  --ink:#141A1B;
+  --ink-2:#4B5658;
+  --ink-3:#7E8A8C;
+  --rule:#D9DCD3;
+  --rule-2:#BFC4B8;
+  --accent:#1F4D3F;
+  --accent-deep:#742A20;
+  --accent-wash:#F1E4E0;
+  --hero-bg:#12181A;
+  --hero-ink:#EFF2EC;
+  --mono:"Cascadia Code","JetBrains Mono",Consolas,"SFMono-Regular",ui-monospace,monospace;
+  --sans:"HarmonyOS Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,serif;
+  --doc-size:17.5px;
+  --rail:17.5rem;
+}
+[data-theme="dark"]{
+  --paper:#111719;
+  --paper-2:#182024;
+  --surface:#161E21;
+  --ink:#E6EAE3;
+  --ink-2:#A7B2B3;
+  --ink-3:#7C888A;
+  --rule:#283336;
+  --rule-2:#374447;
+  --accent-wash:#222B2C;
+  --hero-bg:#0C1113;
+  --hero-ink:#EDF1EA;
+}
+html[data-theme="dark"] body{background:var(--paper);color:var(--ink)}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:var(--doc-size);line-height:1.85;
+  letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img{max-width:100%;height:auto}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in oklab,var(--accent) 35%,transparent)}
+a:hover{border-bottom-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* ---------- 布局 ---------- */
+.shell{display:block}
+.rail{
+  position:fixed;inset:0 auto 0 0;width:86vw;max-width:20rem;z-index:60;
+  background:var(--paper);border-right:1px solid var(--rule);
+  transform:translateX(-102%);transition:transform .28s cubic-bezier(.2,.7,.2,1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.rail.open{transform:translateX(0);box-shadow:0 0 0 100vmax rgba(10,14,15,.42)}
+.doc{min-width:0}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr)}
+  .rail{position:sticky;top:0;transform:none;width:auto;max-width:none;height:100vh;box-shadow:none}
+  .rail-toggle{display:none}
+  .rail-scrim{display:none}
+}
+
+.rail-scrim{position:fixed;inset:0;background:rgba(10,14,15,.42);z-index:55;opacity:0;pointer-events:none;transition:opacity .25s}
+.rail.open+.rail-scrim{opacity:1;pointer-events:auto}
+
+/* ---------- 侧栏 ---------- */
+.rail-head{padding:1.15rem 1.15rem .85rem;border-bottom:1px solid var(--rule)}
+.series{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;color:var(--accent);margin:0 0 .5rem}
+.rail-title{font-size:.98rem;font-weight:600;line-height:1.5;margin:0;letter-spacing:.01em}
+.rail-sub{font-size:.74rem;color:var(--ink-3);margin:.35rem 0 0;line-height:1.5}
+.rail-search{padding:.8rem 1.15rem 0}
+.search-wrap{position:relative}
+#q{
+  width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);
+  background:var(--surface);border:1px solid var(--rule-2);padding:.5rem .6rem;
+  border-radius:0;appearance:none;
+}
+#q::placeholder{color:var(--ink-3)}
+#q:focus{outline:none;border-color:var(--accent)}
+.search-hint{font-size:.7rem;color:var(--ink-3);padding:.35rem .1rem 0}
+.search-panel{
+  position:absolute;left:0;right:0;top:calc(100% + 4px);max-height:52vh;overflow:auto;
+  background:var(--surface);border:1px solid var(--rule-2);z-index:70;display:none;
+}
+.search-panel.on{display:block}
+.sr-item{padding:.55rem .6rem;border-bottom:1px solid var(--rule);cursor:pointer;font-size:.8rem;line-height:1.5}
+.sr-item:hover{background:var(--accent-wash)}
+.sr-t{font-weight:600;display:block}
+.sr-x{color:var(--ink-3);font-size:.72rem}
+.sr-empty{padding:.7rem;font-size:.78rem;color:var(--ink-3)}
+
+.toc{overflow:auto;flex:1;padding:.4rem 0 2rem;scrollbar-width:thin}
+.toc-group{border:0}
+.ch-link{
+  display:grid;grid-template-columns:2.1rem 1fr;gap:.35rem;align-items:baseline;
+  padding:.45rem 1.15rem;cursor:pointer;border:0;background:none;width:100%;text-align:left;
+  font-family:var(--sans);color:var(--ink-2);font-size:.82rem;line-height:1.45;
+}
+.ch-link:hover{color:var(--accent)}
+.ch-link .n{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);text-align:right}
+.ch-link.active{color:var(--accent);font-weight:600}
+.ch-link.active .n{color:var(--accent)}
+.sub-list{padding:0 1.15rem .5rem 3.35rem}
+.sub-link{display:block;width:100%;text-align:left;border:0;background:none;cursor:pointer;
+  font-family:var(--sans);font-size:.75rem;color:var(--ink-3);padding:.18rem 0;line-height:1.4}
+.sub-link:hover{color:var(--accent)}
+.rail-foot{border-top:1px solid var(--rule);padding:.6rem 1.15rem;display:flex;align-items:center;gap:.6rem}
+.rail-foot .meter{flex:1;height:3px;background:var(--rule);position:relative}
+.rail-foot .meter i{position:absolute;inset:0 auto 0 0;width:0%;background:var(--accent)}
+.rail-foot .pct{font-family:var(--mono);font-size:.68rem;color:var(--ink-3)}
+
+/* ---------- 顶栏控件 ---------- */
+.hud{
+  position:fixed;right:.8rem;bottom:.9rem;z-index:50;display:flex;gap:.35rem;
+  background:color-mix(in oklab,var(--surface) 92%,transparent);
+  border:1px solid var(--rule-2);padding:.3rem;backdrop-filter:blur(6px);
+}
+.hud button{
+  font-family:var(--mono);font-size:.72rem;font-variant-numeric:tabular-nums;
+  background:none;border:0;color:var(--ink-2);padding:.45rem .55rem;cursor:pointer;min-height:34px
+}
+.hud button:hover{color:var(--accent);background:var(--accent-wash)}
+.rail-toggle{
+  position:fixed;left:.8rem;bottom:.9rem;z-index:50;background:var(--ink);color:var(--paper);
+  border:0;padding:.6rem .85rem;font-family:var(--sans);font-size:.78rem;cursor:pointer;min-height:44px
+}
+.progressbar{position:fixed;top:0;left:0;height:2px;background:var(--accent);width:0;z-index:80;transition:width .1s linear}
+
+/* ---------- 首屏 ---------- */
+.cover{
+  position:relative;background:var(--hero-bg);color:var(--hero-ink);
+  min-height:88svh;display:flex;flex-direction:column;justify-content:flex-end;
+  overflow:hidden;padding:4.5rem 1.35rem 2.2rem;
+}
+@media (min-width:900px){.cover{padding:5rem 3.2rem 3rem;min-height:86vh}}
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.cover-inner{position:relative;z-index:2;max-width:52rem}
+.cover-kicker{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;color:color-mix(in oklab,var(--hero-ink) 62%,transparent);margin:0 0 1.1rem}
+.cover h1{
+  font-size:clamp(1.9rem,6.2vw,3.5rem);line-height:1.16;font-weight:600;margin:0 0 .9rem;
+  letter-spacing:-.01em;max-width:22ch;
+}
+.cover h1 em{font-style:normal;color:var(--accent)}
+.cover-lede{font-size:clamp(.92rem,2.6vw,1.05rem);line-height:1.75;color:color-mix(in oklab,var(--hero-ink) 78%,transparent);max-width:38rem;margin:0 0 1.6rem}
+.cover-meta{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;font-family:var(--mono);font-size:.7rem;color:color-mix(in oklab,var(--hero-ink) 58%,transparent);border-top:1px solid rgba(255,255,255,.16);padding-top:.9rem}
+.cover-meta span b{color:var(--hero-ink);font-weight:600}
+
+/* ---------- 正文 ---------- */
+.article-wrap{padding:0 1.1rem}
+@media (min-width:900px){.article-wrap{padding:0 3.2rem}}
+article{padding:2.4rem 0 1rem;max-width:47rem}
+@media (min-width:900px){article{padding:3.4rem 0 2rem}}
+
+.chapter{padding-top:.4rem;margin-bottom:3.4rem;scroll-margin-top:1rem}
+.ch-head{border-top:2px solid var(--ink);padding-top:.75rem;margin-bottom:1.6rem}
+.ch-num{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:.4rem}
+.ch-head h2{font-size:clamp(1.35rem,4.4vw,1.9rem);line-height:1.3;margin:0 0 .6rem;font-weight:600;letter-spacing:-.005em}
+.ch-abs{font-family:var(--serif);font-size:.92rem;line-height:1.8;color:var(--ink-2);margin:0;padding-left:.9rem;border-left:2px solid var(--rule-2)}
+.ch-stats{font-family:var(--mono);font-size:.68rem;color:var(--ink-3);margin-top:.7rem}
+
+h3{font-size:1.12rem;line-height:1.5;margin:2.2rem 0 .8rem;font-weight:600;letter-spacing:.004em}
+h3 .sn{font-family:var(--mono);font-size:.78rem;color:var(--accent);font-weight:500;margin-right:.55rem;font-variant-numeric:tabular-nums}
+h4{font-size:.98rem;margin:1.5rem 0 .5rem;font-weight:600;color:var(--ink)}
+p{margin:0 0 1.05rem;text-align:left}
+p.lead{font-size:1.02rem;color:var(--ink)}
+strong{font-weight:600}
+.dim{color:var(--ink-3)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+ul,ol{margin:0 0 1.15rem;padding-left:1.35rem}
+li{margin-bottom:.45rem;line-height:1.8}
+li ul,li ol{margin-top:.4rem;margin-bottom:.2rem}
+ol li::marker{font-family:var(--mono);font-size:.86em;color:var(--accent)}
+
+blockquote{margin:1.2rem 0;padding:.2rem 0 .2rem 1rem;border-left:2px solid var(--rule-2);color:var(--ink-2);font-family:var(--serif)}
+hr{border:0;border-top:1px solid var(--rule);margin:2.2rem 0}
+
+/* 提示块 */
+.note{margin:1.3rem 0;padding:.1rem 0 .1rem .95rem;border-left:3px solid var(--accent);background:linear-gradient(90deg,var(--accent-wash),transparent 88%)}
+.note .lbl{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;color:var(--accent);display:block;margin:.75rem 0 .2rem}
+.note p{margin:.15rem 0 .8rem;font-size:.94rem;line-height:1.78}
+.note.warn{border-left-color:#8A5A15;background:linear-gradient(90deg,#F3EBDA,transparent 88%)}
+.note.warn .lbl{color:#8A5A15}
+.note.eng{border-left-color:#1F4A63;background:linear-gradient(90deg,#E4EDF1,transparent 88%)}
+.note.eng .lbl{color:#1F4A63}
+[data-theme="dark"] .note.warn{background:linear-gradient(90deg,#2A2418,transparent 88%)}
+[data-theme="dark"] .note.eng{background:linear-gradient(90deg,#16242C,transparent 88%)}
+
+/* 代码 */
+.code{margin:1.2rem 0;border:1px solid var(--rule-2);background:var(--surface)}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:.3rem .6rem;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.68rem;color:var(--ink-3)}
+.code-head .lang{letter-spacing:.06em}
+.code-head .copy{border:0;background:none;color:var(--ink-3);font-family:var(--mono);font-size:.68rem;cursor:pointer;padding:.25rem .4rem;min-height:30px}
+.code-head .copy:hover{color:var(--accent)}
+.code pre{margin:0;padding:.9rem .95rem;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.65;color:var(--ink);tab-size:2}
+.code pre code{font-family:inherit}
+
+/* 表格 */
+.tbl{margin:1.3rem 0;overflow-x:auto}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:.84rem;line-height:1.6}
+th,td{border:1px solid var(--rule);padding:.5rem .55rem;vertical-align:top;text-align:left;word-break:break-word}
+th{background:var(--paper-2);font-weight:600;font-size:.8rem;color:var(--ink)}
+td .mono{font-size:.9em}
+
+/* 公式 */
+.math-block{margin:1.15rem 0;overflow-x:auto;overflow-y:hidden;padding:.15rem 0;text-align:center}
+.math-block .katex{font-size:.98em}
+.katex{font-size:.95em}
+.formula-cap{font-family:var(--mono);font-size:.68rem;color:var(--ink-3);text-align:center;margin:-.6rem 0 1.1rem}
+
+/* 图片 / SVG 图 */
+.figure{margin:1.5rem 0;border:1px solid var(--rule);background:var(--surface);padding:.85rem}
+.figure svg,.figure img{display:block;width:100%;height:auto}
+.figcap{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);margin-top:.55rem;line-height:1.5}
+
+/* 实验台 */
+.widget{margin:1.5rem 0;border:1px solid var(--rule-2);background:var(--surface)}
+.widget-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem .9rem;padding:.55rem .75rem;border-bottom:1px solid var(--rule);background:var(--paper-2)}
+.widget-head .w-title{font-size:.86rem;font-weight:600}
+.widget-head .w-hint{font-family:var(--mono);font-size:.68rem;color:var(--ink-3)}
+.widget-body{padding:.85rem .75rem}
+.w-row{display:flex;flex-wrap:wrap;gap:.9rem;align-items:flex-start}
+.w-col{flex:1 1 15rem;min-width:0}
+.w-ctl{display:flex;align-items:center;gap:.6rem;font-size:.78rem;color:var(--ink-2);margin-bottom:.55rem}
+.w-ctl label{min-width:4.4rem;color:var(--ink-2)}
+.w-ctl output{font-family:var(--mono);font-size:.74rem;color:var(--accent);min-width:3.2rem}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:20px;background:none;cursor:pointer;min-width:6rem}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--rule-2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;margin-top:-6px;background:var(--accent);border:0;border-radius:0}
+input[type=range]::-moz-range-track{height:2px;background:var(--rule-2)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;background:var(--accent);border:0;border-radius:0}
+.w-btn{font-family:var(--sans);font-size:.78rem;padding:.4rem .7rem;border:1px solid var(--ink);background:none;color:var(--ink);cursor:pointer;min-height:34px}
+.w-btn:hover{background:var(--ink);color:var(--paper)}
+.w-btn.primary{border-color:var(--accent);color:var(--accent)}
+.w-btn.primary:hover{background:var(--accent);color:#fff}
+.w-btn.sm{min-height:28px;padding:.2rem .5rem;font-size:.72rem}
+.w-canvas{display:block;width:100%;height:auto;border:1px solid var(--rule);background:var(--paper)}
+.w-note{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);margin-top:.5rem;line-height:1.5}
+.w-read{font-family:var(--mono);font-size:.74rem;color:var(--ink-2);margin-top:.4rem}
+
+/* 习题 / 结束 */
+.q-list{counter-reset:q;margin:1rem 0}
+.q-item{counter-increment:q;margin:0 0 1rem;padding-bottom:.7rem;border-bottom:1px dotted var(--rule)}
+.q-item::before{content:"Q" counter(q);font-family:var(--mono);font-size:.7rem;color:var(--accent);margin-right:.55rem}
+.ch-end{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.8rem;display:flex;justify-content:space-between;gap:1rem;font-family:var(--mono);font-size:.7rem;color:var(--ink-3)}
+.ch-end button{border:0;background:none;color:var(--ink-2);font-family:var(--mono);font-size:.7rem;cursor:pointer;padding:.2rem 0}
+.ch-end button:hover{color:var(--accent)}
+
+footer.end{padding:2.5rem 1.1rem 5rem;border-top:1px solid var(--rule);color:var(--ink-3);font-size:.8rem;line-height:1.8}
+@media (min-width:900px){footer.end{padding:2.5rem 3.2rem 5rem}}
+footer.end .series-note{max-width:44rem}
+
+.toast{position:fixed;left:50%;bottom:5.2rem;transform:translate(-50%,12px);background:var(--ink);color:var(--paper);font-size:.78rem;padding:.5rem .85rem;opacity:0;pointer-events:none;transition:.22s;z-index:90;font-family:var(--sans)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+@media print{
+  .rail,.hud,.rail-toggle,.progressbar,.toast,.widget{display:none!important}
+  .cover{min-height:auto;padding:2rem 0}
+  #heroCanvas{display:none}
+  body{font-size:10.5pt}
+  .chapter{page-break-inside:auto}
+  .code,.note{page-break-inside:avoid}
+}
+
+[data-theme="dark"]{--accent:#1F4D3F}
+</style>
+</head>
+<body>
+<div class="progressbar" id="progressbar"></div>
+<div class="shell">
+<aside class="rail" id="rail">
+  <div class="rail-head">
+    <p class="series">AI 教程 · 卷二</p>
+    <p class="rail-title">AI 知识全景： 从概念到工程落地的一条主线</p>
+    <p class="rail-sub">方法论 · 经典模型 · 数据 · 视觉 · NLP · 大模型 · 生成 · 强化 · 部署 · 安全</p>
+  </div>
+  <div class="rail-search">
+    <div class="search-wrap">
+      <input id="q" type="search" autocomplete="off" placeholder="搜索章节、概念、关键词…">
+      <div class="search-hint">共 97 个小节 · 回车跳到首条</div>
+      <div class="search-panel" id="searchPanel"></div>
+    </div>
+  </div>
+  <nav class="toc"><div class="toc-group"><button class="ch-link" data-target="ch1"><span class="n">01</span><span>0　导读：这张地图怎么用</span></button><div class="sub-list"><button class="sub-link" data-target="ch1-s1">1.1 0.1　一条贯穿全卷的主线</button><button class="sub-link" data-target="ch1-s2">1.2 0.2　十四站的路线</button><button class="sub-link" data-target="ch1-s3">1.3 0.3　几个贯穿全卷的判断</button><button class="sub-link" data-target="ch1-s4">1.4 0.4　约定</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch2"><span class="n">02</span><span>1　六十年：三次浪潮与两次寒冬</span></button><div class="sub-list"><button class="sub-link" data-target="ch2-s1">2.1 1.1　三次浪潮共同的形状</button><button class="sub-link" data-target="ch2-s2">2.2 1.2　两次真正的转折点</button><button class="sub-link" data-target="ch2-s3">2.3 1.3　当前阶段的三个真实约束</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch3"><span class="n">03</span><span>2　机器学习方法论：先把问题定对</span></button><div class="sub-list"><button class="sub-link" data-target="ch3-s1">3.1 2.1　先分清任务类型</button><button class="sub-link" data-target="ch3-s2">3.2 2.2　指标：选错了会把人带偏</button><button class="sub-link" data-target="ch3-s3">3.3 2.3　数据划分：验证集是怎么被污染的</button><button class="sub-link" data-target="ch3-s4">3.4 2.4　偏差与方差：一条曲线解释一切</button><button class="sub-link" data-target="ch3-s5">3.5 2.5　类别不平衡的四种处理</button><button class="sub-link" data-target="ch3-s6">3.6 2.6　把问题定清楚的五个问题</button><button class="sub-link" data-target="ch3-s7">3.7 特征工程的实操清单</button><button class="sub-link" data-target="ch3-s8">3.8 交叉验证：什么时候不能用随机划分</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch4"><span class="n">04</span><span>3　经典模型：能不用深度就不用</span></button><div class="sub-list"><button class="sub-link" data-target="ch4-s1">4.1 3.1　选型速查</button><button class="sub-link" data-target="ch4-s2">4.2 3.2　线性模型的价值：可解释与可校准</button><button class="sub-link" data-target="ch4-s3">4.3 3.3　树集成：表格数据的事实标准</button><button class="sub-link" data-target="ch4-s4">4.4 3.4　核 SVM：小样本高维的可靠选择</button><button class="sub-link" data-target="ch4-s5">4.5 3.5　KNN 与朴素贝叶斯：简单但边界清晰</button><button class="sub-link" data-target="ch4-s6">4.6 3.6　可解释性：三种工具</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch5"><span class="n">05</span><span>4　数据工程：模型的上限在这里</span></button><div class="sub-list"><button class="sub-link" data-target="ch5-s1">5.1 4.1　数据泄漏：最常见的"高分离奇好"</button><button class="sub-link" data-target="ch5-s2">5.2 4.2　标签质量：噪声从哪来</button><button class="sub-link" data-target="ch5-s3">5.3 4.3　分布偏移：上线之后才暴露的问题</button><button class="sub-link" data-target="ch5-s4">5.4 4.4　特征工程的现代做法</button><button class="sub-link" data-target="ch5-s5">5.5 4.5　数据量：够不够的判断</button><button class="sub-link" data-target="ch5-s6">5.6 标注质量管理：四个必须做的动作</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch6"><span class="n">06</span><span>5　深度学习：一条能重复的训练流水线</span></button><div class="sub-list"><button class="sub-link" data-target="ch6-s1">6.1 5.1 训练循环的心智模型</button><button class="sub-link" data-target="ch6-s2">6.2 5.2 超参的调整顺序</button><button class="sub-link" data-target="ch6-s3">6.3 5.3 迁移学习：三种微调策略</button><button class="sub-link" data-target="ch6-s4">6.4 5.4 显存：先算清楚再看 OOM 报错</button><button class="sub-link" data-target="ch6-s5">6.5 5.5 九种失败模式对症表</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch7"><span class="n">07</span><span>6　计算机视觉：四个任务，四种评价</span></button><div class="sub-list"><button class="sub-link" data-target="ch7-s1">7.1 6.1 分类：从单标签到多标签</button><button class="sub-link" data-target="ch7-s2">7.2 6.2 检测：框的匹配与 NMS</button><button class="sub-link" data-target="ch7-s3">7.3 6.3 分割：像素级的三类任务</button><button class="sub-link" data-target="ch7-s4">7.4 6.4 从图像处理到深度视觉：哪些东西没变</button><button class="sub-link" data-target="ch7-s5">7.5 6.5 部署侧的现实约束</button><button class="sub-link" data-target="ch7-s6">7.6 上线前的精度检查清单</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch8"><span class="n">08</span><span>7　自然语言处理：从词表到检索</span></button><div class="sub-list"><button class="sub-link" data-target="ch8-s1">8.1 7.1 分词：第一个不可回避的选择</button><button class="sub-link" data-target="ch8-s2">8.2 7.2 词向量：从静态到上下文相关</button><button class="sub-link" data-target="ch8-s3">8.3 7.3 四类任务与各自的评价</button><button class="sub-link" data-target="ch8-s4">8.4 7.4 检索：最被低估的一环</button><button class="sub-link" data-target="ch8-s5">8.5 7.5 传统方法与预训练模型的分界</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch9"><span class="n">09</span><span>8　大模型：能力边界与成本结构</span></button><div class="sub-list"><button class="sub-link" data-target="ch9-s1">9.1 8.1 三段式训练范式</button><button class="sub-link" data-target="ch9-s2">9.2 8.2 能力边界：四类可靠与四类不可靠</button><button class="sub-link" data-target="ch9-s3">9.3 8.3 成本结构：三笔账</button><button class="sub-link" data-target="ch9-s4">9.4 8.4 选型：参数规模与任务匹配</button><button class="sub-link" data-target="ch9-s5">9.5 8.5 评测的陷阱</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch10"><span class="n">10</span><span>9　生成式 AI 与多模态</span></button><div class="sub-list"><button class="sub-link" data-target="ch10-s1">10.1 9.1 图像生成：可控性比质量更重要</button><button class="sub-link" data-target="ch10-s2">10.2 9.2 视频生成：一致性问题</button><button class="sub-link" data-target="ch10-s3">10.3 9.3 语音：三个独立任务</button><button class="sub-link" data-target="ch10-s4">10.4 9.4 多模态：CLIP 是分水岭</button><button class="sub-link" data-target="ch10-s5">10.5 9.5 多模态的三个真实难点</button><button class="sub-link" data-target="ch10-s6">10.6 9.6 选型建议</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch11"><span class="n">11</span><span>10　强化学习与智能体：会决策的系统怎么搭</span></button><div class="sub-list"><button class="sub-link" data-target="ch11-s1">11.1 10.1 强化学习的适用边界</button><button class="sub-link" data-target="ch11-s2">11.2 10.2 四个真实应用方向</button><button class="sub-link" data-target="ch11-s3">11.3 10.3 智能体的四个部件</button><button class="sub-link" data-target="ch11-s4">11.4 10.4 三种架构范式</button><button class="sub-link" data-target="ch11-s5">11.5 10.5 可靠性：智能体最缺的东西</button><button class="sub-link" data-target="ch11-s6">11.6 10.6 与用户业务的关系</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch12"><span class="n">12</span><span>11　工程落地：从实验到服务</span></button><div class="sub-list"><button class="sub-link" data-target="ch12-s1">12.1 11.1 训练侧：四个基础设施</button><button class="sub-link" data-target="ch12-s2">12.2 11.2 推理优化：七种手段与收益量级</button><button class="sub-link" data-target="ch12-s3">12.3 11.3 框架选型</button><button class="sub-link" data-target="ch12-s4">12.4 11.4 C++ 部署的完整链路</button><button class="sub-link" data-target="ch12-s5">12.5 11.5 服务化：三个必须有的机制</button><button class="sub-link" data-target="ch12-s6">12.6 11.6 成本模型：一个能算的公式</button><button class="sub-link" data-target="ch12-s7">12.7 11.7 上线检查清单</button><button class="sub-link" data-target="ch12-s8">12.8 压测怎么做才有意义</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch13"><span class="n">13</span><span>12　评估、安全与合规</span></button><div class="sub-list"><button class="sub-link" data-target="ch13-s1">13.1 12.1 三层评估</button><button class="sub-link" data-target="ch13-s2">13.2 12.2 A/B 的统计学底线</button><button class="sub-link" data-target="ch13-s3">13.3 12.3 大模型特有的评估难题</button><button class="sub-link" data-target="ch13-s4">13.4 12.4 安全：四个层面</button><button class="sub-link" data-target="ch13-s5">13.5 12.5 合规与治理的最小动作</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch14"><span class="n">14</span><span>13　时间序列与推荐系统</span></button><div class="sub-list"><button class="sub-link" data-target="ch14-s1">14.1 13.1 时间序列：先分解，再选模型</button><button class="sub-link" data-target="ch14-s2">14.2 13.2 时序任务的四个陷阱</button><button class="sub-link" data-target="ch14-s3">14.3 13.3 推荐系统：三段式结构</button><button class="sub-link" data-target="ch14-s4">14.4 13.4 协同过滤的两种形态</button><button class="sub-link" data-target="ch14-s5">14.5 13.5 双塔模型：召回的现代主力</button><button class="sub-link" data-target="ch14-s6">14.6 13.6 冷启动：三类解法</button><button class="sub-link" data-target="ch14-s7">14.7 13.7 评估：离线指标与线上指标经常背离</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch15"><span class="n">15</span><span>14　判断一个 AI 需求能不能做</span></button><div class="sub-list"><button class="sub-link" data-target="ch15-s1">15.1 14.1 三个前置问题</button><button class="sub-link" data-target="ch15-s2">15.2 14.2 四象限：按"可验证性 × 容错度"分类</button><button class="sub-link" data-target="ch15-s3">15.3 14.3 成本、延迟、准确性：三角只能选两个</button><button class="sub-link" data-target="ch15-s4">15.4 14.4 需求拆解：把"智能"换成"步骤"</button><button class="sub-link" data-target="ch15-s5">15.5 14.5 五个必问的评审问题</button><button class="sub-link" data-target="ch15-s6">15.6 14.6 什么时候明确说"不做"</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch16"><span class="n">16</span><span>15　数学速查：读论文时最常翻的几页</span></button><div class="sub-list"><button class="sub-link" data-target="ch16-s1">16.1 15.1 矩阵求导常用式</button><button class="sub-link" data-target="ch16-s2">16.2 15.2 概率分布速查</button><button class="sub-link" data-target="ch16-s3">16.3 15.3 常用不等式</button><button class="sub-link" data-target="ch16-s4">16.4 15.4 信息论四个量</button><button class="sub-link" data-target="ch16-s5">16.5 15.5 优化里的几个关键词</button><button class="sub-link" data-target="ch16-s6">16.6 15.6 复杂度速查</button></div></div><div class="toc-group"><button class="ch-link" data-target="ch17"><span class="n">17</span><span>16　路线图、项目清单与术语表</span></button><div class="sub-list"><button class="sub-link" data-target="ch17-s1">17.1 16.1 六个月路线（按周排）</button><button class="sub-link" data-target="ch17-s2">17.2 16.2 七个值得做完的项目</button><button class="sub-link" data-target="ch17-s3">17.3 16.3 常见的学习误区</button><button class="sub-link" data-target="ch17-s4">17.4 16.4 术语表</button><button class="sub-link" data-target="ch17-s5">17.5 16.5 最后一句</button></div></div></nav>
+  <div class="rail-foot"><div class="meter"><i></i></div><span class="pct" id="pct">0%</span></div>
+</aside>
+<div class="rail-scrim" data-act="railstop"></div>
+<main class="doc">
+  <header class="cover">
+    <canvas id="heroCanvas" data-scene="map"></canvas>
+    <div class="cover-inner">
+      <p class="cover-kicker">卷二 / 均衡全景</p>
+      <h1>AI 知识全景：<br>从概念到工程落地的一条主线</h1>
+      <p class="cover-lede">把散落在论文、课程和博客里的名词接成一张能走通的地图：每个概念先回答“它解决什么问题”，再交代它的代价与边界，最后落到工程上怎么做、怎么评、怎么不翻车。</p>
+      <div class="cover-meta"><span>章节 <b>17</b></span><span>正文 <b>24,723</b> 字</span><span>通读 <b>65</b> 分钟</span><span>可交互：过拟合曲线 · Softmax · 卷积 · 梯度下降 · KV 显存</span></div>
+    </div>
+  </header>
+  <div class="article-wrap">
+    <article>
+
+<section class="chapter" id="ch1">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 01</span>
+    <h2>0　导读：这张地图怎么用</h2>
+    <p class="ch-abs">先给一张能走通的地图：这条路经过哪些站，每站解决什么问题。</p>
+    <div class="ch-stats">导读　·　约 1072 字　·　3 分钟</div>
+  </div>
+<p>三卷的分工是：卷一负责"为什么"，卷二负责"有什么、选哪个"，卷三负责"怎么跑起来"。这一卷的定位是<strong>技术选型与全局判断</strong>——你读完应该能回答：面对一个新问题，该先试什么、大概要多少数据、会遇到什么坑、上线后靠什么指标兜底。</p>
+<h3 id="ch1-s1"><span class="sn">1.1</span>0.1　一条贯穿全卷的主线</h3>
+<p>AI 的历史不是方法的堆积，而是一条清晰的主线：<strong>用越来越少的先验，换越来越大的数据和算力</strong>。</p>
+<ul><li>符号主义时代：人把规则写进去，机器只做推理；</li><li>统计学习时代：人设计特征，机器学权重；</li><li>深度学习时代：机器学特征，人设计结构；</li><li>大模型时代：机器学结构的一部分，人只设计训练目标与数据配比。</li></ul>
+<p>每往右走一步，人工先验减少，对数据和算力的依赖增加。这也解释了为什么"AI 落地"在不同行业难度差异巨大：<strong>数据充足、反馈快的领域（搜索、推荐、语音、视觉）先被吃掉；数据稀缺、错误代价高的领域（医疗诊断、工业控制）走得最慢。</strong></p>
+<h3 id="ch1-s2"><span class="sn">1.2</span>0.2　十四站的路线</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>站</th><th>主题</th><th>你要解决的问题</th></tr></thead><tbody><tr><td>1</td><td>发展史</td><td>为什么现在是这个格局</td></tr><tr><td>2</td><td>方法论</td><td>任务、指标、验证怎么定</td></tr><tr><td>3</td><td>经典模型</td><td>不用深度学习的场合该用什么</td></tr><tr><td>4</td><td>数据工程</td><td>数据怎么准备才不白训</td></tr><tr><td>5</td><td>深度学习</td><td>训练一条流水线怎么搭</td></tr><tr><td>6</td><td>计算机视觉</td><td>检测、分割、生成怎么选</td></tr><tr><td>7</td><td>自然语言</td><td>从分词到大模型</td></tr><tr><td>8</td><td>大模型</td><td>能力边界与成本结构</td></tr><tr><td>9</td><td>生成与多模态</td><td>图像、视频、语音怎么统一</td></tr><tr><td>10</td><td>强化与智能体</td><td>会决策的系统怎么搭</td></tr><tr><td>11</td><td>工程落地</td><td>训练、推理、部署、监控</td></tr><tr><td>12</td><td>评估与安全</td><td>怎么知道它真的好、且不出事</td></tr><tr><td>13</td><td>路线与项目</td><td>个人怎么走到能独立交付</td></tr></tbody></table></div>
+<h3 id="ch1-s3"><span class="sn">1.3</span>0.3　几个贯穿全卷的判断</h3>
+<p>这些结论在后面的章节会反复出现，先摆出来：</p>
+<ol><li><strong>先有基线，再谈模型。</strong> 任何任务的第一步都是一个能在一天内跑通的最简方案（逻辑回归、LightGBM、或一个预训练模型的零样本调用）。没有基线的"提升"无法证明。</li><li><strong>指标先于模型。</strong> 指标定义错了，模型越好越糟。离线指标与线上目标不一致，是所有 AI 项目最常见的死法。</li><li><strong>数据决定上限，模型决定离上限多近。</strong> 数据噪声、标签不一致、分布偏移，这些问题的模型侧努力基本无效。</li><li><strong>复杂度要和收益匹配。</strong> 从 92% 到 93% 的准确率，可能要多付 20 倍推理成本。这笔账必须提前算。</li><li><strong>能被监控的才叫上线。</strong> 没有输入分布监控、没有回滚机制、没有错误样本回流，系统迟早会静默失效。</li></ol>
+<div class="note note"><span class="lbl">读法建议</span><p>如果你时间有限，读 2、3、5、11、12 五章——它们覆盖了"定问题、选基线、搭训练、上生产、做评估"的完整闭环，其余章节当字典查。</p></div>
+<h3 id="ch1-s4"><span class="sn">1.4</span>0.4　约定</h3>
+<ul><li><strong>"经典模型"</strong> 指深度学习之前的方法：线性模型、树集成、SVM、KNN、朴素贝叶斯、聚类。</li><li><strong>"大模型"</strong> 指参数规模在十亿以上、以自监督预训练为基础、可通过提示或微调适配多任务的模型。</li><li><strong>"落地"</strong> 指能对外提供服务、有 SLA、有监控、有回滚的系统，不是 notebook 里跑通的实验。</li></ul>
+  <div class="ch-end"><span>01 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch2">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 02</span>
+    <h2>1　六十年：三次浪潮与两次寒冬</h2>
+    <p class="ch-abs">三次浪潮与两次寒冬，以及每一轮"AI 要取代人"的预言为什么都没按时兑现。</p>
+    <div class="ch-stats">全景　·　约 1124 字　·　3 分钟</div>
+  </div>
+<p>了解历史不是为了背年份，而是为了看清一件事：<strong>这个领域每隔十几年就会重演一次"能力被高估、然后被现实打回"的循环</strong>。知道这个模式，你对当下任何"颠覆性突破"的判断都会更冷静。</p>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>时期</th><th>主线</th><th>代表成果</th><th>为什么会结束</th></tr></thead><tbody><tr><td>1943–1956</td><td>神经元模型与图灵测试</td><td>McCulloch-Pitts 神经元、感知机</td><td>单层感知机无法解决异或，被证明能力有限</td></tr><tr><td>1956–1974</td><td>符号主义与搜索</td><td>通用问题求解器、LISP</td><td>组合爆炸、常识难以手工编码</td></tr><tr><td>1974–1980</td><td>第一次寒冬</td><td>经费收缩</td><td>承诺与现实差距过大</td></tr><tr><td>1980–1987</td><td>专家系统</td><td>医疗诊断、配置系统</td><td>规则维护成本爆炸，无法处理不确定性</td></tr><tr><td>1987–1993</td><td>第二次寒冬</td><td>—</td><td>专家系统泡沫破裂</td></tr><tr><td>1986–2011</td><td>统计学习</td><td>反向传播、SVM、随机森林、CRF</td><td>特征工程瓶颈、数据规模受限</td></tr><tr><td>2012–2017</td><td>深度学习</td><td>AlexNet、ResNet、seq2seq、GAN</td><td>需要大量标注，泛化到新任务成本高</td></tr><tr><td>2017–2022</td><td>预训练 + 微调</td><td>Transformer、BERT、GPT</td><td>每任务一模型，部署与维护成本高</td></tr><tr><td>2022–至今</td><td>大模型与多模态</td><td>指令微调、RLHF、扩散、Agent</td><td>推理成本、可靠性、幻觉仍未解决</td></tr></tbody></table></div>
+<h3 id="ch2-s1"><span class="sn">2.1</span>1.1　三次浪潮共同的形状</h3>
+<p>每一轮都遵循同一个剧本：</p>
+<ol><li><strong>一个新方法解决了旧方法的瓶颈</strong>（感知机解决手工规则，深度学习解决特征工程，大模型解决任务定制）；</li><li><strong>媒体与资本把"能做什么"外推成"什么都能做"</strong>；</li><li><strong>真实场景的边界条件（数据、成本、可靠性）暴露</strong>；</li><li><strong>进入低谷，但方法本身沉淀下来</strong>。</li></ol>
+<p>低谷期并非浪费：SVM、集成学习、概率图模型都是在寒冬前后成熟的，它们至今是表格数据与可解释场景的主力。</p>
+<h3 id="ch2-s2"><span class="sn">2.2</span>1.2　两次真正的转折点</h3>
+<p>如果只能记两个节点，记这两个：</p>
+<ul><li><strong>2012 年 AlexNet</strong>：GPU + ReLU + Dropout + 大数据，把 ImageNet 错误率从 26% 拉到 15%。它证明的不是"卷积好用"（卷积早就好用），而是<strong>"算力 + 数据"能突破手工特征的天花板</strong>；</li><li><strong>2017 年 Transformer</strong>：把序列建模从串行改成并行，使"堆更多层、喂更多数据"在工程上可行。它之后的每一年，模型规模与数据规模都在按同一条曲线增长。</li></ul>
+<h3 id="ch2-s3"><span class="sn">2.3</span>1.3　当前阶段的三个真实约束</h3>
+<p>历史告诉我们，判断一个技术能否落地，看三件事是否同时成立：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>约束</th><th>现状</th><th>影响</th></tr></thead><tbody><tr><td>数据</td><td>文本、图像充裕；专业领域稀缺</td><td>通用能力易得，专业能力仍需标注</td></tr><tr><td>算力</td><td>训练集中在大厂，推理可下沉</td><td>本地部署以量化为前提</td></tr><tr><td>可靠性</td><td>幻觉、分布外失效仍普遍</td><td>高风险场景必须人在回路</td></tr></tbody></table></div>
+<p><strong>结论：通用能力已经"过剩"，稀缺的是可靠性与领域数据。</strong> 这也是为什么近几年的技术热点集中在 RAG、Agent、评测、对齐——它们都在补"可靠性"这一块。</p>
+<div class="note note"><span class="lbl">要点</span><p>看到"某模型又突破"时，先问三个问题：它在什么数据上评的？失败模式是什么？单位成本多少？这三问能过滤掉大部分噪音。</p></div>
+  <div class="ch-end"><span>02 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch3">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 03</span>
+    <h2>2　机器学习方法论：先把问题定对</h2>
+    <p class="ch-abs">项目失败最多的地方不是模型，而是"要预测什么""怎么算对""怎么验证"这三件事没想清楚。</p>
+    <div class="ch-stats">方法论　·　约 2042 字　·　5 分钟</div>
+  </div>
+<p>一个 AI 项目的成败，在写第一行代码之前就决定了大概七成。这一章讲的都是"动手之前"的事。</p>
+<h3 id="ch3-s1"><span class="sn">3.1</span>2.1　先分清任务类型</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>任务</th><th>有标签</th><th>典型问题</th><th>常用方法</th></tr></thead><tbody><tr><td>监督·分类</td><td>是（离散）</td><td>欺诈、故障、意图识别</td><td>逻辑回归、树集成、神经网络</td></tr><tr><td>监督·回归</td><td>是（连续）</td><td>销量、价格、剩余寿命</td><td>线性、GBDT、神经网络</td></tr><tr><td>排序</td><td>是（相关性等级）</td><td>搜索、推荐</td><td>LambdaMART、双塔、交叉特征</td></tr><tr><td>无监督</td><td>否</td><td>分群、异常检测、降维</td><td>K-means、孤立森林、PCA</td></tr><tr><td>自监督</td><td>无（自己造）</td><td>表示学习、预训练</td><td>掩码、对比学习</td></tr><tr><td>强化学习</td><td>奖励</td><td>控制、调度、游戏</td><td>PPO、DQN、策略搜索</td></tr></tbody></table></div>
+<p><strong>最容易搞错的是"分类 vs 排序"</strong>。推荐系统里"用户会不会点"是分类，但产品要的是"给这个用户排哪十个"，两者目标函数不同。把排序当分类训，模型会倾向于推"人人都点"的热门内容，个性化反而变差。</p>
+<h3 id="ch3-s2"><span class="sn">3.2</span>2.2　指标：选错了会把人带偏</h3>
+<p>二分类的混淆矩阵给出四个数：TP、FP、FN、TN。由此派生：</p>
+<div class="math-block" data-tex="\text{Precision}=\frac{TP}{TP+FP},\qquad \text{Recall}=\frac{TP}{TP+FN},\qquad F_1=\frac{2PR}{P+R}">\text{Precision}=\frac{TP}{TP+FP},\qquad \text{Recall}=\frac{TP}{TP+FN},\qquad F_1=\frac{2PR}{P+R}</div>
+<p>解释一遍：</p>
+<ul><li><strong>精确率</strong>：报出来的有多少是真的（错了会怎样）；</li><li><strong>召回率</strong>：真的里面抓到了多少（漏了会怎样）；</li><li><strong><span class="m-inline" data-tex="F_1">F_1</span></strong>：两者的调和平均，偏向较小的一方。</li></ul>
+<p>还有两个"阈值无关"的指标：</p>
+<ul><li><strong>ROC-AUC</strong>：随机取一个正样本和一个负样本，正样本得分高于负样本的概率。它在<strong>类别平衡</strong>时很好用；</li><li><strong>PR-AUC</strong>：在<strong>类别极不平衡</strong>（比如欺诈只占 0.1%）时更可靠，因为 ROC 的假阳性率分母是 <span class="m-inline" data-tex="FP+TN">FP+TN</span>，负样本极多时 ROC 会显得很好看，而实际精确率很低。</li></ul>
+<div class="note warn"><span class="lbl">常见坑</span><ul><li>类别不平衡时只看准确率：99% 的样本是负类，一个"全预测负类"的模型准确率 99%，毫无用处。</li><li>只看 AUC 不看阈值：AUC 0.9 的模型，在业务要求的精确率下召回可能只有 10%。必须画出 PR 曲线，选工作点。</li><li>回归任务只看 RMSE 不看分布：RMSE 会被少数大误差主导，如果业务关心"大多数情况"，MAE 更合适；如果关心"极端情况别太离谱"，看 P95 分位误差。</li></ul></div>
+<h3 id="ch3-s3"><span class="sn">3.3</span>2.3　数据划分：验证集是怎么被污染的</h3>
+<p>标准做法是训练集 / 验证集 / 测试集，比例常见 6:2:2 或 8:1:1。三条铁律：</p>
+<ol><li><strong>测试集只能用一次</strong>。反复看测试集调参，等于把它变成了验证集，最终指标会虚高；</li><li><strong>时间序列必须按时间切</strong>。用未来预测过去，或者随机打乱时间顺序，会造成信息泄漏——模型在训练时"见过未来"；</li><li><strong>分组不能跨集合</strong>。同一个用户、同一张图的不同裁剪、同一病人的多次检查，必须整体落在同一个集合里，否则验证分数没有意义。</li></ol>
+<p>交叉验证（<span class="m-inline" data-tex="k">k</span>-fold）用于数据量小的情况：把数据分 <span class="m-inline" data-tex="k">k</span> 份，轮流用一份做验证。它给出的是"性能的方差估计"，而不只是一个数——<strong>方差大说明模型对数据划分敏感，这本身就是信息</strong>。</p>
+<div class="widget" data-widget="fitpoly"><div class="widget-head"><span class="w-title">过拟合实验台</span><span class="w-hint">同一批数据，把多项式次数从 1 拉到 9，看训练误差与泛化</span></div><div class="widget-body">
+      <div class="w-ctl"><label>多项式次数</label><input type="range" data-deg min="1" max="9" step="1" value="1"><output data-degout></output></div>
+      <canvas class="w-canvas"></canvas>
+      <div class="w-read" data-read></div></div></div>
+<h3 id="ch3-s4"><span class="sn">3.4</span>2.4　偏差与方差：一条曲线解释一切</h3>
+<p>把期望泛化误差分解：</p>
+<div class="math-block" data-tex="\mathbb{E}\big[(y-\hat f(x))^2\big]=\underbrace{\text{Bias}^2}_{\text{模型太简单}}+\underbrace{\text{Variance}}_{\text{模型太敏感}}+\underbrace{\sigma^2}_{\text{噪声下界}}">\mathbb{E}\big[(y-\hat f(x))^2\big]=\underbrace{\text{Bias}^2}_{\text{模型太简单}}+\underbrace{\text{Variance}}_{\text{模型太敏感}}+\underbrace{\sigma^2}_{\text{噪声下界}}</div>
+<ul><li>高偏差：训练误差和验证误差都高，模型欠拟合；</li><li>高方差：训练误差低、验证误差高，模型记住了噪声；</li><li><span class="m-inline" data-tex="\sigma^2">\sigma^2</span> 是数据本身的不可约误差，换模型也消不掉。</li></ul>
+<p>这个分解的价值在于<strong>它把"调参"变成了诊断</strong>：先看训练/验证误差的差距，判断你在曲线的哪一侧，再决定是加容量还是加正则。上面的实验台可以直接看到这条曲线：次数从 1 增到 9，训练误差一路降，泛化能力先降后升。</p>
+<h3 id="ch3-s5"><span class="sn">3.5</span>2.5　类别不平衡的四种处理</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>手段</th><th>做法</th><th>代价</th></tr></thead><tbody><tr><td>重采样</td><td>过采样少数类 / 欠采样多数类</td><td>过采样易过拟合，欠采样丢信息</td></tr><tr><td>加权损失</td><td>少数类损失乘大权重</td><td>权重过大会导致校准变差</td></tr><tr><td>阈值调整</td><td>不改训练，只调判定阈值</td><td>最简单，最常被忽略</td></tr><tr><td>合成样本</td><td>SMOTE 在少数类近邻间插值</td><td>高维或类别边界复杂时效果差</td></tr></tbody></table></div>
+<p><strong>优先级建议：先调阈值，再考虑加权，最后才重采样。</strong> 阈值调整不改变模型，只改工作点，代价最低。</p>
+<h3 id="ch3-s6"><span class="sn">3.6</span>2.6　把问题定清楚的五个问题</h3>
+<p>动手前，逐个回答：</p>
+<ol><li><strong>预测目标是什么？</strong> 一个具体的、可观测的量（"7 天内是否流失"），而不是抽象概念（"用户满意度"）。</li><li><strong>标签怎么来？</strong> 人工标注、日志回填、还是业务结果？延迟多久？有没有系统性偏差？</li><li><strong>错误的代价对称吗？</strong> 漏检一个欺诈 vs 误封一个正常用户，代价可能差百倍，这决定了指标与阈值。</li><li><strong>上线后靠什么监控？</strong> 输入分布、输出分布、业务指标，三者至少要监控两个。</li><li><strong>最简基线是什么？</strong> 规则、历史均值、热门推荐、零样本调用大模型——先有一个能对比的数。</li></ol>
+<div class="note eng"><span class="lbl">工程视角</span><p>这五个问题写成文档，比任何模型架构图都重要。实践中最常见的返工是：模型训完才发现标签定义和业务口径不一致。<strong>标签定义要落到 SQL 或代码里，不要停留在自然语言描述。</strong></p></div>
+<h3 id="ch3-s7"><span class="sn">3.7</span>特征工程的实操清单</h3>
+<p>拿到一张表，按这个顺序过一遍，通常能拿到大部分收益：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>步骤</th><th>动作</th><th>判断依据</th></tr></thead><tbody><tr><td>1 看分布</td><td>每列的缺失率、取值数、偏度</td><td>缺失 &gt; 30% 的列要么删要么单独建模</td></tr><tr><td>2 处理时间</td><td>拆出年/月/日/星期/是否节假日</td><td>有周期性的业务几乎必做</td></tr><tr><td>3 处理类别</td><td>频次编码 + 目标编码（带折外防泄漏）</td><td>高基数类别不要直接 one-hot</td></tr><tr><td>4 造交叉</td><td>两两相乘、比值、差值</td><td>业务上有关联的才做</td></tr><tr><td>5 聚合特征</td><td>按用户/商品的统计量（均值、计数、最近一次）</td><td>注意只能用当前时刻之前的数据</td></tr><tr><td>6 筛选</td><td>重要性排序，去掉冗余</td><td>相关性 &gt; 0.95 的成对特征留一个</td></tr></tbody></table></div>
+<p><strong>目标编码是最容易泄漏的一步</strong>：用全量数据算类别均值，等于把标签信息带进了特征。正确做法是 K 折外编码——每一折用其余折的数据算均值。</p>
+<h3 id="ch3-s8"><span class="sn">3.8</span>交叉验证：什么时候不能用随机划分</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>数据结构</th><th>划分方式</th><th>原因</th></tr></thead><tbody><tr><td>独立同分布样本</td><td>随机 K 折</td><td>常规</td></tr><tr><td>同一用户多条记录</td><td>按用户分组</td><td>否则同人数据同时出现在训练与验证</td></tr><tr><td>时间序列</td><td>按时间切</td><td>否则用到未来信息</td></tr><tr><td>同一文档多段</td><td>按文档分组</td><td>否则模型记住了文档而不是规律</td></tr></tbody></table></div>
+<p>判断方法很朴素：<strong>问一句"这条验证样本的信息，训练时能不能看到"</strong>。能看到，就必须换划分方式。</p>
+  <div class="ch-end"><span>03 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch4">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 04</span>
+    <h2>3　经典模型：能不用深度就不用</h2>
+    <p class="ch-abs">不追新的时候该用什么：一张按场景分流的工具箱清单。</p>
+    <div class="ch-stats">经典模型　·　约 1785 字　·　5 分钟</div>
+  </div>
+<p>这一章不推导（推导在卷一第 6–9 章），只给<strong>选型判断</strong>。理由很简单：经典模型训练快、可解释、部署轻、对数据量要求低，在很多真实业务里它已经够用，而深度模型带来的额外复杂度需要实打实的收益来换。</p>
+<h3 id="ch4-s1"><span class="sn">4.1</span>3.1　选型速查</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>场景</th><th>首选</th><th>备选</th><th>关键理由</th></tr></thead><tbody><tr><td>需要解释每个预测</td><td>逻辑回归 + 特征工程</td><td>浅层树 + SHAP</td><td>系数可直接解释</td></tr><tr><td>表格数据、追求精度</td><td>LightGBM / XGBoost</td><td>CatBoost</td><td>抗尺度、抗缺失、自动交互</td></tr><tr><td>样本极少（&lt;1000）</td><td>逻辑回归 / 朴素贝叶斯</td><td>核 SVM</td><td>参数少，不容易过拟合</td></tr><tr><td>高维稀疏（文本 TF-IDF）</td><td>线性 SVM / 逻辑回归</td><td>朴素贝叶斯</td><td>高效、稳定</td></tr><tr><td>需要概率校准</td><td>逻辑回归 / 校准后的树</td><td>Platt scaling</td><td>树输出的概率不平滑</td></tr><tr><td>在线学习、流式更新</td><td>SGDClassifier / 被动攻击</td><td>—</td><td>支持增量</td></tr><tr><td>异常检测、无标签</td><td>孤立森林 / LOF</td><td>自编码器重构误差</td><td>无需标签</td></tr><tr><td>时序预测、强季节性</td><td>季节性 ARIMA / Prophet</td><td>LightGBM + 时间特征</td><td>树不能外推趋势</td></tr><tr><td>中小规模图像</td><td>预训练 CNN 微调</td><td>HOG+SVM</td><td>迁移学习远胜手工特征</td></tr></tbody></table></div>
+<h3 id="ch4-s2"><span class="sn">4.2</span>3.2　线性模型的价值：可解释与可校准</h3>
+<p>逻辑回归的系数 <span class="m-inline" data-tex="\beta_j">\beta_j</span> 表示"特征 <span class="m-inline" data-tex="x_j">x_j</span> 增加一单位，对数几率增加 <span class="m-inline" data-tex="\beta_j">\beta_j</span>"。这是业务方唯一能直接读懂的形式，也是风控、医疗、金融等受监管行业仍大量使用它的原因。</p>
+<p>两点工程经验：</p>
+<ul><li><strong>先做特征标准化</strong>，否则系数大小不可比（正则化也会失真）；</li><li><strong>注意多重共线性</strong>：两个高度相关的特征会让系数符号翻转，解释失真。用 VIF 检查，或改用岭回归。</li></ul>
+<h3 id="ch4-s3"><span class="sn">4.3</span>3.3　树集成：表格数据的事实标准</h3>
+<p>LightGBM 在中等数据上通常是最强基线，配置建议：</p>
+<div class="code"><div class="code-head"><span class="lang">python</span><button class="copy" data-act="copy">复制</button></div><pre><code>import lightgbm as lgb
+
+params = dict(
+    objective='binary',
+    learning_rate=0.05,        # 先小一点，配合更多轮
+    num_leaves=31,             # 控制复杂度，别超过 2^depth
+    min_data_in_leaf=20,       # 防过拟合的关键参数
+    feature_fraction=0.8,      # 列采样，降相关性
+    bagging_fraction=0.8,
+    bagging_freq=1,
+    lambda_l2=1.0,             # 叶权重正则
+    metric='auc',
+)
+# 早停：验证集连续 50 轮不提升就停
+model = lgb.train(params, dtrain, num_boost_round=2000,
+                  valid_sets=[dvalid], callbacks=[lgb.early_stopping(50)])</code></pre></div>
+<p>调参优先级（按收益排序）：<code>learning_rate</code> + <code>num_boost_round</code> 一起调 → <code>num_leaves</code> / <code>min_data_in_leaf</code> → 采样比例 → 正则项。</p>
+<p><strong>不要做的事</strong>：把连续特征做标准化（树不在乎）、对缺失值做插补（LightGBM 原生处理更好）、做大量多项式特征（树自己会组合）。</p>
+<h3 id="ch4-s4"><span class="sn">4.4</span>3.4　核 SVM：小样本高维的可靠选择</h3>
+<p>适用条件很明确：<strong>样本量几千以内、特征维度高、边界非线性但类别可分</strong>。文本分类（TF-IDF 特征）是它的经典战场。</p>
+<p>三个必调项：<span class="m-inline" data-tex="C">C</span>（正则强度）、核类型、RBF 的 <span class="m-inline" data-tex="\gamma">\gamma</span>。经验起点：<span class="m-inline" data-tex="C">C</span> 从 1 开始按 10 倍网格搜索，<span class="m-inline" data-tex="\gamma">\gamma</span> 取 <span class="m-inline" data-tex="1/d">1/d</span>（<span class="m-inline" data-tex="d">d</span> 是特征数）附近。</p>
+<p><strong>不适用的场合</strong>：样本超过 5 万（训练 <span class="m-inline" data-tex="O(N^3)">O(N^3)</span>）、需要输出概率（要用 Platt 校准，成本不低）、需要在线更新。</p>
+<h3 id="ch4-s5"><span class="sn">4.5</span>3.5　KNN 与朴素贝叶斯：简单但边界清晰</h3>
+<p><strong>KNN</strong> 没有训练阶段，预测时算距离。它的隐含假设是"近处样本同类"。高维时距离会失效（维度灾难：所有点对的距离趋于相同），必须先降维或选特征。适合作为"必须极简"场景的兜底。</p>
+<p><strong>朴素贝叶斯</strong> 假设特征在给定类别下条件独立。这个假设几乎总是错的，但它在文本分类上仍然有效——因为分类只需要"哪个后验最大"，不需要概率精确。它的优点是训练是闭式解、极快、可增量。</p>
+<h3 id="ch4-s6"><span class="sn">4.6</span>3.6　可解释性：三种工具</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>工具</th><th>说明</th><th>适用</th></tr></thead><tbody><tr><td>特征重要性（分裂增益）</td><td>树模型自带，反映"用了多少"</td><td>快速筛查，但有偏（偏好高基数特征）</td></tr><tr><td>Permutation importance</td><td>打乱某特征看指标掉多少</td><td>更可靠，计算成本高</td></tr><tr><td>SHAP</td><td>基于博弈论的边际贡献分配</td><td>单样本解释，可加性严格</td></tr></tbody></table></div>
+<p>SHAP 值得多用：它给出"这个样本为什么被判为高风险"的逐特征归因，业务方能接受，也便于发现数据 bug（比如某个 ID 类特征贡献异常高，往往是泄漏）。</p>
+<div class="note eng"><span class="lbl">工程视角</span><p>选型时算一笔账：一个 LightGBM 模型训练 3 分钟、推理 50 微秒、内存 100MB、可解释；一个 7B 模型推理 50 毫秒、需要 GPU、不可解释。<strong>同样 92% 的准确率，前者在多数业务里更划算。</strong> 先证明收益，再升级复杂度。</p></div>
+  <div class="ch-end"><span>04 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch5">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 05</span>
+    <h2>4　数据工程：模型的上限在这里</h2>
+    <p class="ch-abs">数据泄漏、标签噪声、分布偏移——三个让模型白训的问题，以及各自的检查方法。</p>
+    <div class="ch-stats">数据　·　约 1504 字　·　4 分钟</div>
+  </div>
+<p>有一句被反复引用的话：<strong>数据和特征决定了上限，模型只是逼近这个上限</strong>。这一章讲三件最容易做错的事。</p>
+<h3 id="ch5-s1"><span class="sn">5.1</span>4.1　数据泄漏：最常见的"高分离奇好"</h3>
+<p>泄漏指训练时用到了预测时拿不到的信息。它的表现是<strong>离线指标异常好，上线立刻崩</strong>。四种典型形态：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>类型</th><th>例子</th><th>怎么发现</th></tr></thead><tbody><tr><td>时间泄漏</td><td>用未来的统计量做特征（如全量均值）</td><td>特征与标签的相关性高得反常</td></tr><tr><td>目标泄漏</td><td>特征里混入了标签的派生量（如"结案时间"）</td><td>单特征 AUC 异常高</td></tr><tr><td>分组泄漏</td><td>同一实体跨训练/验证集</td><td>按实体分组重切后指标大跌</td></tr><tr><td>重复样本</td><td>同一记录重复出现在两个集合</td><td>去重后指标变化</td></tr></tbody></table></div>
+<p>排查方法很朴素，但有效：<strong>逐个特征算单特征 AUC，凡是超过 0.9 的都去看一眼它的定义</strong>。真正有强预测力的特征很少，异常高的往往是泄漏。</p>
+<h3 id="ch5-s2"><span class="sn">5.2</span>4.2　标签质量：噪声从哪来</h3>
+<p>标签不是真理，是观测。三类常见问题：</p>
+<ul><li><strong>标注不一致</strong>：同一批数据两个人标出不同结果。先算标注者间的一致率（Cohen's <span class="m-inline" data-tex="\kappa">\kappa</span>），低于 0.6 说明定义本身模糊，要先修定义；</li><li><strong>代理标签偏差</strong>：用"点击"当"喜欢"，用"复购"当"满意"。代理与目标的相关性决定了模型上限；</li><li><strong>延迟标签</strong>：欺诈要 30 天后才确认，模型只能用 30 天前的数据训练。这会引入"标签未成熟"问题，需要设置观察窗口。</li></ul>
+<p>处理噪声的实用手段：<strong>对称损失</strong>（对噪声鲁棒）、<strong>置信学习</strong>（用模型找出高概率错标的样本再人工复核）、<strong>多标注者投票</strong>。但优先级最高的是修流程，而不是修算法。</p>
+<h3 id="ch5-s3"><span class="sn">5.3</span>4.3　分布偏移：上线之后才暴露的问题</h3>
+<p>训练分布 <span class="m-inline" data-tex="p_{\text{train}}(x,y)">p_{\text{train}}(x,y)</span> 与线上 <span class="m-inline" data-tex="p_{\text{live}}(x,y)">p_{\text{live}}(x,y)</span> 不一致，模型就会退化。三种类型：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>类型</th><th>变化</th><th>例子</th></tr></thead><tbody><tr><td>协变量偏移</td><td>只有 <span class="m-inline" data-tex="p(x)">p(x)</span> 变</td><td>用户结构变化、季节变化</td></tr><tr><td>概念偏移</td><td><span class="m-inline" data-tex="p(y\mid x)">p(y\mid x)</span> 变</td><td>欺诈手法升级、用户偏好变</td></tr><tr><td>标签偏移</td><td><span class="m-inline" data-tex="p(y)">p(y)</span> 变</td><td>大促期间购买率暴涨</td></tr></tbody></table></div>
+<p>监控上分别对应：<strong>输入特征的分布监控</strong>（PSI、KS）、<strong>预测分布的监控</strong>、<strong>业务指标的监控</strong>。三者缺一不可，因为协变量偏移可以先于指标暴露出来。</p>
+<h3 id="ch5-s4"><span class="sn">5.4</span>4.4　特征工程的现代做法</h3>
+<p>深度模型能自动学特征，但"喂什么进去"仍然关键。三类手工特征仍有价值：</p>
+<ul><li><strong>统计聚合</strong>：用户近 7/30/90 天行为计数、金额均值——树的模型尤其吃这类特征；</li><li><strong>交叉特征</strong>：类别 × 类别的组合（如"城市 × 时段"），在推荐里效果显著；</li><li><strong>时间特征</strong>：星期、是否节假日、距上次行为的间隔。注意<strong>周期编码</strong>（sin/cos）比整数编码更合理，避免"周日 0 与周一 6 距离很远"的假象。</li></ul>
+<div class="note warn"><span class="lbl">常见坑</span><ul><li>用全量数据算标准化参数再划分训练集——这是泄漏，标准化统计量必须只从训练集算；</li><li>目标编码（target encoding）直接在全集上算均值——严重泄漏，必须在折内计算；</li><li>把 ID 类高基数特征直接 one-hot——维度爆炸且学到噪声，应改用频次编码或 embedding。</li></ul></div>
+<h3 id="ch5-s5"><span class="sn">5.5</span>4.5　数据量：够不够的判断</h3>
+<p>粗略的经验（会有偏差，但能给你量级感觉）：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>任务</th><th>从零训练</th><th>微调预训练模型</th></tr></thead><tbody><tr><td>图像分类（10 类）</td><td>每类数千</td><td>每类数十</td></tr><tr><td>文本分类</td><td>数万条</td><td>数百到数千</td></tr><tr><td>目标检测</td><td>每类数千张</td><td>数百张</td></tr><tr><td>语音识别</td><td>数百小时</td><td>数十小时</td></tr></tbody></table></div>
+<p><strong>先问"能不能用预训练模型"，再问"要多少数据"</strong>——这一步经常能把需求降一到两个数量级。</p>
+<h3 id="ch5-s6"><span class="sn">5.6</span>标注质量管理：四个必须做的动作</h3>
+<p>标注是 AI 项目里最贵也最容易被低估的一环。四条基本纪律：</p>
+<ol><li><strong>先写规范，再招人</strong>。规范里要有正面例子与边界例子，不能只有定义；</li><li><strong>双标注 + 一致性检验</strong>。抽 10% 做重复标注，算 Cohen's kappa；低于 0.6 说明规范本身有问题，不是标注员的问题；</li><li><strong>黄金集</strong>。混入 20 条已确定答案的样本，定期检查标注员是否漂移；</li><li><strong>回流机制</strong>。线上发现的错例，定期加入训练集，形成闭环。</li></ol>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>指标</th><th>含义</th><th>健康值</th></tr></thead><tbody><tr><td>标注一致性 kappa</td><td>两人标注的吻合程度</td><td>&gt; 0.7</td></tr><tr><td>黄金集通过率</td><td>标注员对已知答案的准确率</td><td>&gt; 95%</td></tr><tr><td>单条耗时</td><td>标注效率</td><td>与预算匹配</td></tr></tbody></table></div>
+<p><strong>一个反直觉的结论</strong>：标注质量的上限由规范决定，不由标注员决定。规范模糊时，加人只会增加噪声。</p>
+  <div class="ch-end"><span>05 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch6">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 06</span>
+    <h2>5　深度学习：一条能重复的训练流水线</h2>
+    <p class="ch-abs">一条训练流水线怎么搭，超参按什么顺序调，以及九种失败模式的对症表。</p>
+    <div class="ch-stats">深度学习　·　约 1422 字　·　4 分钟</div>
+  </div>
+<p>原理部分（初始化、归一化、残差）在卷一第 10 章讲过。这一章讲<strong>操作层</strong>：怎么组织代码、按什么顺序调参、出了问题怎么定位。</p>
+<h3 id="ch6-s1"><span class="sn">6.1</span>5.1 训练循环的心智模型</h3>
+<p>任何训练脚本都是这五步的循环：</p>
+<div class="code"><div class="code-head"><span class="lang">python</span><button class="copy" data-act="copy">复制</button></div><pre><code>for step, batch in enumerate(loader):
+    x, y = batch                       # 1. 取数据（含增强、设备拷贝）
+    logits = model(x)                  # 2. 前向
+    loss = criterion(logits, y)        # 3. 损失
+    loss.backward()                    # 4. 反向（建图 -&gt; 回传）
+    optimizer.step()                   # 5. 更新
+    optimizer.zero_grad(set_to_none=True)  # 清梯度，放最后更省内存</code></pre></div>
+<p><strong>把这五步写成可开关的开关</strong>，是让调试变快的关键：能在 100 个样本上跑完整个循环、能关掉增强、能只跑前向。很多"训不动"的问题，靠缩小规模能在十分钟内定位。</p>
+<h3 id="ch6-s2"><span class="sn">6.2</span>5.2 超参的调整顺序</h3>
+<p>按影响大小排（而不是按论文里写得多的排）：</p>
+<ol><li><strong>学习率</strong>：影响最大。先用 lr range test 扫一遍，选损失下降最快的区间的下限；</li><li><strong>batch 大小与调度</strong>：batch 大则 lr 要相应放大（线性缩放规则），并配 warmup；</li><li><strong>模型规模</strong>：宽/深按数据量选，宁可先小后大；</li><li><strong>正则强度</strong>：weight decay、dropout、label smoothing，先只调 weight decay；</li><li><strong>其余</strong>：优化器细节（<span class="m-inline" data-tex="\beta_1,\beta_2,\epsilon">\beta_1,\beta_2,\epsilon</span>）、增强强度。</li></ol>
+<p>一个常被忽略的事实：<strong>小模型 + 好数据 &gt; 大模型 + 一般数据</strong>。在数据有限时，先把数据质量提上去，收益通常超过换模型。</p>
+<h3 id="ch6-s3"><span class="sn">6.3</span>5.3 迁移学习：三种微调策略</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>策略</th><th>做法</th><th>适用</th></tr></thead><tbody><tr><td>冻结主干</td><td>只训最后的分类头</td><td>数据极少（数百）、任务与预训练接近</td></tr><tr><td>分层学习率</td><td>主干 lr 小、头部 lr 大</td><td>中等数据、任务有差异</td></tr><tr><td>全量微调</td><td>所有参数更新</td><td>数据充足、任务差异大</td></tr></tbody></table></div>
+<p>视觉任务的经验起点：冻结主干训 5 轮头部，再解冻全部用 <span class="m-inline" data-tex="1/10">1/10</span> 的学习率微调。文本任务用 BERT 类模型时，学习率 2e-5 到 5e-5 是常见区间，太大容易破坏预训练知识。</p>
+<h3 id="ch6-s4"><span class="sn">6.4</span>5.4 显存：先算清楚再看 OOM 报错</h3>
+<p>训练显存大致由四部分组成：</p>
+<div class="math-block" data-tex="\text{总显存}\approx \underbrace{\text{参数}}_{\text{权重}}+\underbrace{\text{梯度}}_{\text{同权重}}+\underbrace{\text{优化器状态}}_{\text{Adam 约 2 倍权重}}+\underbrace{\text{激活值}}_{\text{与 batch、序列长成正比}}">\text{总显存}\approx \underbrace{\text{参数}}_{\text{权重}}+\underbrace{\text{梯度}}_{\text{同权重}}+\underbrace{\text{优化器状态}}_{\text{Adam 约 2 倍权重}}+\underbrace{\text{激活值}}_{\text{与 batch、序列长成正比}}</div>
+<p>以 FP16 + Adam 训练 7B 模型为例：权重 14GB、梯度 14GB、Adam 的 <span class="m-inline" data-tex="m">m</span> 与 <span class="m-inline" data-tex="v">v</span> 各 28GB（FP32）、激活另算——<strong>光静态部分就超过 80GB</strong>。这解释了为什么需要 ZeRO/FSDP 做参数分片（卷三展开）。</p>
+<p>常见省显存手段的优先级：小 batch + 梯度累积 → 混合精度 → 梯度检查点 → 参数分片。</p>
+<h3 id="ch6-s5"><span class="sn">6.5</span>5.5 九种失败模式对症表</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>现象</th><th>最可能的原因</th><th>先试什么</th></tr></thead><tbody><tr><td>损失不降</td><td>lr 太小 / 数据或标签错</td><td>放大 lr 10 倍；过拟合 10 个样本</td></tr><tr><td>损失变 NaN</td><td>lr 太大 / 混合精度溢出</td><td>降 lr；检查 loss scale</td></tr><tr><td>训练降验证升</td><td>过拟合</td><td>加正则、加数据、减容量</td></tr><tr><td>训练验证都不动</td><td>欠拟合或梯度消失</td><td>加容量、换激活、查梯度范数</td></tr><tr><td>指标卡在某个值</td><td>类别不平衡 / 指标错</td><td>看混淆矩阵，换指标</td></tr><tr><td>结果每次都不一样且差很多</td><td>初始化或数据顺序问题</td><td>固定种子，检查 shuffle</td></tr><tr><td>验证远好于训练</td><td>数据泄漏</td><td>查单特征 AUC、查重复样本</td></tr><tr><td>推理与训练结果不一致</td><td>BN 的 train/eval 模式</td><td>确认 <code>model.eval()</code></td></tr><tr><td>显存缓慢增长</td><td>计算图未释放 / 缓存累积</td><td>检查 <code>detach()</code>、清缓存</td></tr></tbody></table></div>
+<div class="widget" data-widget="gradient"><div class="widget-head"><span class="w-title">梯度下降实验台</span><span class="w-hint">拖学习率、点画布换起点，观察步长与收敛的关系</span></div><div class="widget-body">
+      <div class="w-row">
+        <div class="w-col">
+          <canvas class="w-canvas"></canvas>
+          <div class="w-note">点一下画布任意位置可以换起点；箭头是负梯度方向。</div>
+        </div>
+        <div class="w-col" style="flex:0 1 13rem">
+          <div class="w-ctl"><label>学习率 η</label><input type="range" data-lr min="0.02" max="0.62" step="0.01" value="0.28"><output data-lrout></output></div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .6rem">
+            <button class="w-btn primary" data-run>运行</button>
+            <button class="w-btn" data-step>单步</button>
+            <button class="w-btn" data-reset>重置</button>
+          </div>
+          <div class="w-read" data-read></div>
+          <div class="w-note">η 太小时像蜗牛，太大时会越过谷底甚至发散。</div>
+        </div>
+      </div></div></div>
+<p>上面这个实验台可以当作"学习率直觉"的训练：把 η 推到 0.6 附近，你会看到轨迹直接飞出去——这就是发散；调到 0.05，收敛慢得看不出变化。真实训练里的表现一模一样，只是维度更高、看不见而已。</p>
+<div class="note eng"><span class="lbl">工程视角</span><p>把训练脚本做成<strong>可断点续训</strong>、<strong>可精确复现</strong>（固定种子 + 记录版本）、<strong>日志结构化</strong>（loss、lr、梯度范数、吞吐）。这三件事在第一次跑长训练时看起来是浪费时间，在第二次改模型时会救你。</p></div>
+  <div class="ch-end"><span>06 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch7">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 07</span>
+    <h2>6　计算机视觉：四个任务，四种评价</h2>
+    <p class="ch-abs">分类、检测、分割、深度估计：四个任务的评价方式完全不同，选型逻辑也不同。</p>
+    <div class="ch-stats">视觉　·　约 1563 字　·　4 分钟</div>
+  </div>
+<p>你有数字图像处理的底子，这一章的重点不是"卷积是什么"，而是<strong>任务怎么定义、指标怎么算、方案怎么选</strong>。</p>
+<h3 id="ch7-s1"><span class="sn">7.1</span>6.1 分类：从单标签到多标签</h3>
+<p>分类的输出是一个概率向量。三个现代要点：</p>
+<ul><li><strong>数据增强是主要收益来源</strong>：RandAugment、MixUp、CutMix 这类方法在中小数据集上能提升几个点，比换模型划算；</li><li><strong>标签平滑</strong>抑制过度自信，改善校准；</li><li><strong>长尾问题</strong>：真实数据类别极不均衡，用重采样、logit adjustment 或两阶段训练（先均衡预训练，再长尾微调）。</li></ul>
+<p>指标：Top-1 / Top-5 准确率。<strong>注意类别不均衡时用宏平均（macro-F1），不要用微平均</strong>，后者会被大类主导。</p>
+<h3 id="ch7-s2"><span class="sn">7.2</span>6.2 检测：框的匹配与 NMS</h3>
+<p>检测输出"每个目标的框 + 类别"。核心机制有三个：</p>
+<ol><li><strong>锚框 / 无锚</strong>：Faster R-CNN 用锚框，YOLO 后期版本用中心点 + 尺寸回归，省掉锚框调参；</li><li><strong>IoU 与匹配</strong>：预测框与真值框的交并比决定"算不算命中"。IoU 阈值 0.5 常用于"是否检出"，0.75 用于"框得准不准"；</li><li><strong>NMS</strong>：同一目标会有多个重叠框，按分数排序后抑制 IoU 超过阈值的。</li></ol>
+<p>指标是 <strong>mAP</strong>（各类 AP 的均值），分 mAP@0.5 和 mAP@0.5:0.95（后者对框的精度要求更高）。<strong>报告 mAP 时必须写清阈值</strong>，否则数字不可比。</p>
+<div class="note warn"><span class="lbl">常见坑</span><ul><li>小目标检测：下采样太多导致小目标在特征图上只剩几个像素。解法是高分辨率特征图、FPN 多尺度融合、切片推理（把大图切块分别检测再合并）；</li><li>NMS 阈值调不好会"吞掉"密集目标（人群、货架），改用 Soft-NMS 或可学习的 NMS。</li></ul></div>
+<h3 id="ch7-s3"><span class="sn">7.3</span>6.3 分割：像素级的三类任务</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>类型</th><th>输出</th><th>代表方法</th><th>指标</th></tr></thead><tbody><tr><td>语义分割</td><td>每像素类别</td><td>U-Net、DeepLab</td><td>mIoU</td></tr><tr><td>实例分割</td><td>每实例的掩码</td><td>Mask R-CNN</td><td>mask mAP</td></tr><tr><td>全景分割</td><td>两者合并</td><td>Panoptic FPN</td><td>PQ</td></tr></tbody></table></div>
+<p>mIoU 的定义是"交并比在所有类别上取平均"，它惩罚"漏标"和"多标"同样重。医学图像里更常用 Dice 系数，因为它对类别极不平衡更友好。</p>
+<p>现代趋势是<strong>提示式分割</strong>（SAM 一类）：给定点、框或文本提示，输出掩码。它把分割从"每类训一个模型"变成"一个模型适配多任务"，这大幅降低了标注需求。</p>
+<h3 id="ch7-s4"><span class="sn">7.4</span>6.4 从图像处理到深度视觉：哪些东西没变</h3>
+<p>你在图像处理课上学的东西依然有效，只是角色变了：</p>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>传统技术</th><th>在深度视觉里的位置</th></tr></thead><tbody><tr><td>高斯滤波 / 双边滤波</td><td>预处理去噪；也可作为固定卷积核嵌入网络</td></tr><tr><td>边缘检测（Sobel/Canny）</td><td>浅层卷积学到的正是这类核；Canny 仍用于后处理与标注辅助</td></tr><tr><td>形态学操作</td><td>掩码后处理（去除小连通域、填补空洞）</td></tr><tr><td>直方图均衡 / Gamma</td><td>数据增强与预处理；但要注意它会改变分布</td></tr><tr><td>多尺度金字塔</td><td>FPN、图像金字塔推理，思想完全相同</td></tr><tr><td>光流</td><td>视频理解的基础；传统 Lucas-Kanade 仍用于快速场景</td></tr></tbody></table></div>
+<p><strong>一句话：传统方法是可解释的先验，深度方法是可学习的先验。</strong> 二者常常组合使用，而不是替代关系。</p>
+<h3 id="ch7-s5"><span class="sn">7.5</span>6.5 部署侧的现实约束</h3>
+<p>视觉模型上线的瓶颈很少是精度，而是：</p>
+<ul><li><strong>延迟</strong>：1080p 视频 30fps 意味着每帧 33ms 的预算，包含解码、预处理、推理、后处理；</li><li><strong>量化</strong>：INT8 量化通常带来 2–4 倍加速，精度掉 0.5–2 个点，需要逐层校准；</li><li><strong>输入分辨率</strong>：分辨率翻倍，卷积计算量翻 4 倍。很多"精度提升"其实来自更高分辨率，而不是更好的结构；</li><li><strong>算子支持</strong>：某些自定义算子（如可变形卷积）在目标推理引擎上不支持，会被回退到 CPU，性能骤降。</li></ul>
+<div class="note eng"><span class="lbl">工程视角</span><p>选型时先定延迟预算，再选模型。一个能在 20ms 内跑完的 85% mAP 模型，胜过一个需要 80ms 的 88% mAP 模型——因为前者能上更多路摄像头，总覆盖收益更高。<strong>这是工程判断，不是精度竞赛。</strong></p></div>
+<h3 id="ch7-s6"><span class="sn">7.6</span>上线前的精度检查清单</h3>
+<p>离线 mAP 高不等于线上可用。上线前必查五项：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>检查</th><th>做法</th><th>常见问题</th></tr></thead><tbody><tr><td>分布一致性</td><td>对比线上与训练集的亮度、分辨率、长宽比分布</td><td>线上手机拍摄的畸变与训练集不符</td></tr><tr><td>小目标</td><td>单独统计小尺寸目标的召回</td><td>整体 mAP 掩盖了小目标崩塌</td></tr><tr><td>类别不均衡</td><td>看每类的 P/R，不只看均值</td><td>稀有类几乎检不出</td></tr><tr><td>后处理参数</td><td>NMS 阈值、置信度阈值在线上数据上重调</td><td>沿用训练集的最优值</td></tr><tr><td>延迟</td><td>端到端测（含解码、后处理）</td><td>只测了模型前向</td></tr></tbody></table></div>
+<p><strong>最容易被忽略的是第四项</strong>：置信度阈值直接决定"误检 vs 漏检"的平衡，而它应该由业务代价决定，不是由验证集 F1 决定。</p>
+  <div class="ch-end"><span>07 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch8">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 08</span>
+    <h2>7　自然语言处理：从词表到检索</h2>
+    <p class="ch-abs">从分词到检索：NLP 的每个环节都有它的坑，指标尤其不可信。</p>
+    <div class="ch-stats">自然语言　·　约 1516 字　·　4 分钟</div>
+  </div>
+<p>文本任务的难点不在模型结构，而在<strong>离散符号如何变成连续向量</strong>、以及<strong>评价指标如何逼近人的判断</strong>。这两件事至今没有完美解法。</p>
+<h3 id="ch8-s1"><span class="sn">8.1</span>7.1 分词：第一个不可回避的选择</h3>
+<p>模型不认识字符串，只认识 ID。分词（tokenization）把文本切成子词单元。三种主流算法：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>算法</th><th>做法</th><th>特点</th></tr></thead><tbody><tr><td>BPE</td><td>从字符开始，反复合并最高频相邻对</td><td>GPT 系使用，压缩率好</td></tr><tr><td>WordPiece</td><td>合并能最大化似然增益的对</td><td>BERT 系使用</td></tr><tr><td>Unigram</td><td>从大词表开始，按损失删减</td><td>SentencePiece 常用，多语言友好</td></tr></tbody></table></div>
+<p>中文的特殊性：没有空格，所以早期用字级或词级（依赖分词工具），现在主流是<strong>直接在字/子词级别做 BPE</strong>，让模型自己学组合。</p>
+<p>一个常被忽略的事实：<strong>词表大小是一个工程权衡</strong>。词表大 → 序列短（推理快）、但嵌入矩阵大、低频词学不好；词表小 → 序列长（推理慢）、但泛化好。LLaMA 系用 32K，一些多语言模型用 100K 以上。</p>
+<h3 id="ch8-s2"><span class="sn">8.2</span>7.2 词向量：从静态到上下文相关</h3>
+<ul><li><strong>静态词向量</strong>（word2vec、GloVe）：一个词一个向量。问题是多义词无法区分（"苹果"既是水果也是公司）；</li><li><strong>上下文词向量</strong>（ELMo、BERT）：同一个词在不同句子里得到不同向量。这是预训练模型的根本贡献。</li></ul>
+<p>word2vec 的训练目标（skip-gram + 负采样）在卷一第 14 章推导过，其思想——"把正样本与随机负样本分开"——是对比学习的原型。</p>
+<h3 id="ch8-s3"><span class="sn">8.3</span>7.3 四类任务与各自的评价</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>任务</th><th>输入→输出</th><th>指标</th><th>指标的坑</th></tr></thead><tbody><tr><td>文本分类</td><td>文本→标签</td><td>准确率、宏 F1</td><td>类别不均衡时必须看每类</td></tr><tr><td>序列标注（NER）</td><td>文本→每 token 标签</td><td>实体级 F1</td><td>必须按实体算，不能按 token 算</td></tr><tr><td>抽取式问答</td><td>问题+段落→片段</td><td>EM / F1</td><td>EM 要求完全匹配，过于严格</td></tr><tr><td>生成（翻译/摘要）</td><td>文本→文本</td><td>BLEU / ROUGE / BERTScore</td><td>与人的判断相关性弱</td></tr></tbody></table></div>
+<p><strong>BLEU/ROUGE 的局限值得单独强调</strong>：它们基于 n-gram 重叠，对同义改写、语序变化极不敏感。一个语义完全正确但用词不同的译文可能得分很低。所以现在的生成任务更常用：</p>
+<ul><li><strong>BERTScore</strong>：用上下文嵌入算相似度，对改写更宽容；</li><li><strong>COMET / BLEURT</strong>：训练过的评估模型；</li><li><strong>LLM-as-judge</strong>：用强模型按标准打分，成本高但更接近人。</li></ul>
+<h3 id="ch8-s4"><span class="sn">8.4</span>7.4 检索：最被低估的一环</h3>
+<p>很多"大模型答不准"的问题，根源在检索而不是生成。检索的基本流程：</p>
+<ol><li><strong>切分（chunking）</strong>：把文档切成 200–500 字的块，重叠 10–20% 避免切断语义；</li><li><strong>编码</strong>：用双塔模型（如 bge、e5 系列）把块编码成向量，离线建索引；</li><li><strong>召回</strong>：向量近邻（HNSW/IVF）+ 关键词（BM25）双路召回；</li><li><strong>重排（rerank）</strong>：用交叉编码器对 Top-50 精排，取 Top-5。</li></ol>
+<p>双塔与交叉编码器的区别很重要：</p>
+<ul><li><strong>双塔</strong>：query 与 doc 分别编码，可离线建索引，快，但交互信息少；</li><li><strong>交叉编码器</strong>：把 query 与 doc 拼起来一起编码，精度高，但每个候选都要过一次模型，只能用于重排。</li></ul>
+<p><strong>先用双塔召回 50 个，再用交叉编码器重排</strong>，这是成本与效果的平衡点。卷三会展开完整链路。</p>
+<div class="note warn"><span class="lbl">常见坑</span><ul><li>只用向量检索：专有名词、编号、代码这类"精确匹配"需求会漏，必须加 BM25；</li><li>chunk 太大：召回的是长段落，生成时上下文被稀释；太小则语义不完整；</li><li>用通用嵌入模型做垂直领域检索：金融、医疗、法律的术语分布差异大，需要在领域数据上微调嵌入模型。</li></ul></div>
+<h3 id="ch8-s5"><span class="sn">8.5</span>7.5 传统方法与预训练模型的分界</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>场景</th><th>建议</th></tr></thead><tbody><tr><td>有标注数据几千条以上</td><td>微调预训练模型（BERT 类），通常最优</td></tr><tr><td>标注极少（几十条）</td><td>零样本/少样本提示，或先用 LLM 生成弱标签</td></tr><tr><td>极低延迟（微秒级）</td><td>TF-IDF + 线性模型，仍然能打</td></tr><tr><td>需要解释</td><td>关键词 + 规则 + 线性模型</td></tr><tr><td>多语言</td><td>多语言预训练模型（XLM-R、mT5）</td></tr></tbody></table></div>
+<p><strong>"LLM 全能"是个误解</strong>：在固定类别的分类任务上，一个小 BERT 微调后往往比调用大模型更准、更快、更便宜。大模型的优势在开放域、少样本、需要推理与生成的场景。</p>
+  <div class="ch-end"><span>08 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch9">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 09</span>
+    <h2>8　大模型：能力边界与成本结构</h2>
+    <p class="ch-abs">大模型能做什么、不能做什么、贵在哪——三个问题的答案决定了它在你的项目里该放在什么位置。</p>
+    <div class="ch-stats">大模型　·　约 1383 字　·　4 分钟</div>
+  </div>
+<p>这一章不讲解法（解法在卷三），讲<strong>判断</strong>：什么时候该用大模型、用多大的、贵在哪、承诺给业务方的能力里哪些是靠不住的。</p>
+<h3 id="ch9-s1"><span class="sn">9.1</span>8.1 三段式训练范式</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>阶段</th><th>数据</th><th>目标</th><th>得到什么</th></tr></thead><tbody><tr><td>预训练</td><td>万亿级 token 文本</td><td>下一个 token 预测</td><td>语言能力、世界知识、推理雏形</td></tr><tr><td>监督微调（SFT）</td><td>数万到数百万条指令-回答</td><td>学会"按指令作答"</td><td>可用性、格式遵循</td></tr><tr><td>对齐（RLHF/DPO）</td><td>人类偏好对比</td><td>让回答更符合偏好</td><td>有用性、无害性、语气</td></tr></tbody></table></div>
+<p>这个范式解释了一个常见困惑：<strong>为什么模型"知道"很多却常常答错</strong>？因为预训练优化的是"预测下一个词"，而不是"说真话"。知识以统计关联的形式存在，不是可检索的事实库。SFT 与对齐改变的是行为风格，不能保证事实正确。</p>
+<h3 id="ch9-s2"><span class="sn">9.2</span>8.2 能力边界：四类可靠与四类不可靠</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>相对可靠</th><th>相对不可靠</th></tr></thead><tbody><tr><td>语言改写、翻译、摘要</td><td>精确数值计算、多步算术</td></tr><tr><td>格式转换、结构化抽取</td><td>长链逻辑推理（超过 5–6 步）</td></tr><tr><td>代码生成（有明确模式）</td><td>需要外部实时信息的事实问答</td></tr><tr><td>按给定材料作答</td><td>判断"自己不知道"（校准差）</td></tr></tbody></table></div>
+<p>第三行与第四行是最需要工程补偿的：前者靠工具调用（计算器、代码执行），后者靠检索与"引用出处"约束。</p>
+<p><strong>关于幻觉</strong>，需要理解它的机制而不是当成 bug：模型在生成每个 token 时做的是概率采样，流畅性与正确性由同一个目标驱动。当训练数据里"看起来合理的错误"很常见时，模型会学到"编得像"比"承认不知道"更符合分布。所以要靠外部约束（检索、引用、拒答训练），不能靠提示词根治。</p>
+<h3 id="ch9-s3"><span class="sn">9.3</span>8.3 成本结构：三笔账</h3>
+<h4>训练账</h4>
+<div class="math-block" data-tex="\text{训练算力}\approx 6\times N\times D">\text{训练算力}\approx 6\times N\times D</div>
+<p><span class="m-inline" data-tex="N">N</span> 是参数量，<span class="m-inline" data-tex="D">D</span> 是训练 token 数。这个 6 来自前向 2 次 + 反向 4 次浮点运算/参数/token。例如 7B 模型训 2T token：<span class="m-inline" data-tex="6\times7\times10^9\times2\times10^{12}\approx8.4\times10^{22}">6\times7\times10^9\times2\times10^{12}\approx8.4\times10^{22}</span> FLOPs。按 A100 的 312 TFLOPS（FP16，实际利用率约 40%）折算，需要约 <span class="m-inline" data-tex="6.7\times10^{5}">6.7\times10^{5}</span> GPU 小时。</p>
+<h4>推理账</h4>
+<div class="math-block" data-tex="\text{每 token 算力}\approx 2N\ (\text{前向}),\qquad \text{显存}\approx \text{权重}+ \text{KV cache}">\text{每 token 算力}\approx 2N\ (\text{前向}),\qquad \text{显存}\approx \text{权重}+ \text{KV cache}</div>
+<p>7B 模型 FP16 权重 14GB，加上 KV cache 与激活，单卡 24GB 可以跑；13B 需要 24GB 以上或量化；70B 需要多卡或 INT4。</p>
+<h4>上下文账</h4>
+<p>上下文长度不是免费的：KV cache 随序列长度线性增长，注意力计算随长度平方增长。<strong>长上下文 = 更贵的显存 + 更慢的首 token</strong>。这是"为什么不能无脑塞满上下文"的量化解释。</p>
+<h3 id="ch9-s4"><span class="sn">9.4</span>8.4 选型：参数规模与任务匹配</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>任务</th><th>建议规模</th><th>理由</th></tr></thead><tbody><tr><td>分类、抽取、改写（有标注）</td><td>小模型微调（0.1–1B）或 BERT 类</td><td>精度足够、成本低一个量级</td></tr><tr><td>通用问答、RAG</td><td>7–14B</td><td>能力与成本平衡点</td></tr><tr><td>复杂推理、代码</td><td>30B 以上或调用 API</td><td>规模对推理能力影响显著</td></tr><tr><td>端侧/离线</td><td>1–4B 量化</td><td>内存与功耗约束</td></tr><tr><td>高并发简单任务</td><td>API 或小模型 + 缓存</td><td>单位成本优先</td></tr></tbody></table></div>
+<p>一个务实策略：<strong>先用最大的可用模型做"能力上限测试"，再用小模型逼近</strong>。如果大模型也做不好，说明问题不在模型规模，而在任务定义或数据。</p>
+<h3 id="ch9-s5"><span class="sn">9.5</span>8.5 评测的陷阱</h3>
+<ul><li><strong>数据污染</strong>：benchmark 的题目可能出现在预训练语料里，分数虚高；</li><li><strong>提示敏感</strong>：同一个模型换一种问法，分数差 10 个点；</li><li><strong>选择偏差</strong>：只报告最好的那次运行；</li><li><strong>指标与用途脱节</strong>：MMLU 高不代表你的业务场景好。</li></ul>
+<p>靠谱的做法是<strong>自建业务评测集</strong>：从真实流量里采样 200–500 条，人工标注期望输出，形成回归测试。这个集合比任何公开榜单都有用。</p>
+<div class="note note"><span class="lbl">要点</span><p>把大模型当"能力很强但不可靠的实习生"来用：给它明确的材料（检索）、明确的格式（结构化输出）、明确的检查（后处理校验），并保留人工复核。这个定位比"智能助手"更符合它现在的实际水平。</p></div>
+  <div class="ch-end"><span>09 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch10">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 10</span>
+    <h2>9　生成式 AI 与多模态</h2>
+    <p class="ch-abs">图像、视频、语音、跨模态：生成模型的四条产线，以及它们共同的瓶颈。</p>
+    <div class="ch-stats">生成　·　约 1330 字　·　4 分钟</div>
+  </div>
+<p>生成模型的原理（VAE、GAN、扩散）在卷一第 13 章。这一章讲<strong>产品化的形态</strong>：现在能做什么、用什么控制、卡在哪。</p>
+<h3 id="ch10-s1"><span class="sn">10.1</span>9.1 图像生成：可控性比质量更重要</h3>
+<p>文生图的基本架构是"文本编码器 + 扩散主干 + 解码器"。稳定扩散系列还多一个 VAE，把 512×512 的图压到 64×64 的潜空间再扩散，算力省几十倍。</p>
+<p>真正决定可用性的是<strong>控制手段</strong>：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>手段</th><th>作用</th><th>代价</th></tr></thead><tbody><tr><td>提示词</td><td>描述内容与风格</td><td>不稳定，对措辞敏感</td></tr><tr><td>负向提示</td><td>排除不要的元素</td><td>需要经验</td></tr><tr><td>ControlNet</td><td>用边缘/深度/姿态图约束结构</td><td>多一次前向，需额外模型</td></tr><tr><td>IP-Adapter</td><td>用参考图控制风格/人物</td><td>需要参考图</td></tr><tr><td>LoRA</td><td>定制特定主体或画风</td><td>需要少量训练数据</td></tr></tbody></table></div>
+<div class="note note"><span class="lbl">要点</span><p>"生成质量"很快会同质化，"可控与可编辑"才是产品差异点。做图像产品时，把预算投在控制链路上，比投在换更大的基座模型回报更高。</p></div>
+<h3 id="ch10-s2"><span class="sn">10.2</span>9.2 视频生成：一致性问题</h3>
+<p>视频比图像多了时间维，难点从"像不像"变成"动不动得对"：</p>
+<ul><li><strong>时序一致性</strong>：人物的脸、衣服纹理、光照在帧间不能跳变；</li><li><strong>运动合理性</strong>：物理规律（重力、碰撞）与镜头运动；</li><li><strong>长视频</strong>：自回归拼接容易漂移，需要关键帧锚定。</li></ul>
+<p>当前主流做法是<strong>潜空间扩散 + 时空注意力</strong>（把时间当第三维做注意力），或者用"图像模型 + 运动模块"分离训练。评测仍不成熟，常用人工打分与光流一致性。</p>
+<h3 id="ch10-s3"><span class="sn">10.3</span>9.3 语音：三个独立任务</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>任务</th><th>输入→输出</th><th>主流方案</th><th>关键指标</th></tr></thead><tbody><tr><td>ASR（识别）</td><td>音频→文本</td><td>Conformer / Whisper 类</td><td>字错率 CER</td></tr><tr><td>TTS（合成）</td><td>文本→音频</td><td>扩散/流匹配声码器</td><td>MOS 主观分、RTF</td></tr><tr><td>声纹/分离</td><td>音频→身份/干净音轨</td><td>说话人嵌入、源分离</td><td>等错误率 EER、SI-SDR</td></tr></tbody></table></div>
+<p>语音的特殊约束是<strong>实时性</strong>：流式 ASR 要求"边说边出字"，延迟控制在几百毫秒，这与非流式模型的精度有取舍（看未来上下文 vs 只看历史）。</p>
+<h3 id="ch10-s4"><span class="sn">10.4</span>9.4 多模态：CLIP 是分水岭</h3>
+<p>CLIP 用对比学习把图像与文本对齐到同一个向量空间：一批图文对里，配对的为正样本，其余为负样本，损失就是 InfoNCE。</p>
+<div class="math-block" data-tex="L=-\log\frac{\exp(\mathrm{sim}(I_i,T_i)/\tau)}{\sum_j\exp(\mathrm{sim}(I_i,T_j)/\tau)}">L=-\log\frac{\exp(\mathrm{sim}(I_i,T_i)/\tau)}{\sum_j\exp(\mathrm{sim}(I_i,T_j)/\tau)}</div>
+<p>它的产物是一个<strong>共享的语义空间</strong>，于是可以做零样本分类（把类别名当文本查询）、图文检索、以及作为视觉编码器接入大模型。</p>
+<p>现代视觉语言模型（VLM）的典型结构：</p>
+<div class="code"><div class="code-head"><span class="lang">text</span><button class="copy" data-act="copy">复制</button></div><pre><code>图像 → 视觉编码器（ViT）→ 投影层（MLP/Q-Former）→ 与文本 token 拼接 → LLM 解码</code></pre></div>
+<p>关键设计点是<strong>投影层</strong>：它要把视觉特征"翻译"成 LLM 能理解的 token。训练通常分两阶段：先冻结两端只训投影层（对齐），再联合微调（指令跟随）。</p>
+<h3 id="ch10-s5"><span class="sn">10.5</span>9.5 多模态的三个真实难点</h3>
+<ol><li><strong>分辨率与 token 预算</strong>：一张 1024×1024 的图如果切成 16×16 的 patch，就是 4096 个 token，直接吃掉上下文。所以高分辨率需要动态切块 + 压缩；</li><li><strong>细粒度 grounding</strong>：模型能描述"图里有一只猫"，但定位"猫的左耳在哪个像素"仍然弱。这需要专门的定位数据与结构（如加检测头）；</li><li><strong>视频的时序建模</strong>：帧数 = token 数，成本爆炸。常见折中是低帧率采样 + 关键帧 + 时间位置编码。</li></ol>
+<h3 id="ch10-s6"><span class="sn">10.6</span>9.6 选型建议</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>需求</th><th>建议</th></tr></thead><tbody><tr><td>商品图、海报、插画</td><td>扩散 + ControlNet + 固定 LoRA</td></tr><tr><td>需要精确文字渲染</td><td>专门优化的模型（文字渲染一直是弱项）</td></tr><tr><td>短视频素材</td><td>图生视频（首帧可控）优于纯文生视频</td></tr><tr><td>语音转写</td><td>开源 Whisper 类 + 领域词表微调</td></tr><tr><td>图文检索</td><td>CLIP 类双塔，领域数据上微调</td></tr><tr><td>图文问答</td><td>开源 VLM 微调，或调用 API</td></tr></tbody></table></div>
+<div class="note warn"><span class="lbl">常见坑</span><ul><li>直接用通用文生图做品牌素材，会出现 Logo 变形、文字乱码——必须用参考图约束（IP-Adapter）或后期合成；</li><li>语音合成的评测 MOS 分需要人听，自动化指标（如 MCD）与主观感受相关性有限；</li><li>多模态模型的"看图说话"能力很强，但"按坐标定位"能力弱，不要用它替代检测模型。</li></ul></div>
+  <div class="ch-end"><span>10 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch11">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 11</span>
+    <h2>10　强化学习与智能体：会决策的系统怎么搭</h2>
+    <p class="ch-abs">智能体不是"更会聊天的模型"，而是"能调用工具、能做多步决策、能被约束的系统"。</p>
+    <div class="ch-stats">智能体　·　约 1245 字　·　3 分钟</div>
+  </div>
+<p>强化学习的数学（MDP、贝尔曼、策略梯度、PPO）在卷一第 14 章。这一章讲<strong>它在哪里真的有用</strong>，以及"智能体"这个被过度使用的词到底指什么。</p>
+<h3 id="ch11-s1"><span class="sn">11.1</span>10.1 强化学习的适用边界</h3>
+<p>强化学习适合同时满足三个条件的场景：</p>
+<ol><li><strong>有明确的奖励信号</strong>（赢/输、成本、成功率）；</li><li><strong>可以大量试错</strong>（仿真环境、线上有安全边界）；</li><li><strong>决策是序列的</strong>（当前动作影响未来状态）。</li></ol>
+<p>不满足就优先用监督学习或规则：</p>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>场景</th><th>更适合的方法</th></tr></thead><tbody><tr><td>单步决策、有标注</td><td>监督学习</td></tr><tr><td>奖励稀疏且无法仿真</td><td>模仿学习 / 逆强化学习</td></tr><tr><td>状态空间小、规则明确</td><td>搜索 / 动态规划</td></tr><tr><td>需要可解释与合规</td><td>规则 + 监督模型</td></tr></tbody></table></div>
+<h3 id="ch11-s2"><span class="sn">11.2</span>10.2 四个真实应用方向</h3>
+<ul><li><strong>游戏与仿真</strong>：AlphaGo、Atari、Dota——环境可无限重置，是 RL 的最佳试验场；</li><li><strong>机器人控制</strong>： sim2real 是核心难题，域随机化（随机材质、光照、质量）是常用手段；</li><li><strong>推荐与广告</strong>：把"用户反馈"当奖励，但要注意"奖励滞后"与"策略偏置"（只学到已曝光内容）；</li><li><strong>调度与资源分配</strong>：数据中心冷却、物流路径、电网调度，奖励明确且可仿真。</li></ul>
+<p>工业界真正赚钱的 RL 应用大多<strong>不是端到端的</strong>，而是"RL 优化一个局部决策 + 传统系统兜底"。这一点常被媒体叙事掩盖。</p>
+<h3 id="ch11-s3"><span class="sn">11.3</span>10.3 智能体的四个部件</h3>
+<p>把"智能体（Agent）"拆开，它必须有四件东西：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>部件</th><th>作用</th><th>缺了会怎样</th></tr></thead><tbody><tr><td>感知</td><td>读入用户输入、环境状态</td><td>无法响应变化</td></tr><tr><td>规划</td><td>把目标拆成步骤</td><td>遇到多步任务就乱</td></tr><tr><td>工具</td><td>调用搜索、代码、API</td><td>只能空谈，不能行动</td></tr><tr><td>记忆</td><td>保存上下文与历史结果</td><td>重复劳动、前后矛盾</td></tr></tbody></table></div>
+<p>一个常见的误解是"给模型加个工具调用就是 Agent"。实际上<strong>规划与记忆才是分水岭</strong>：能自己决定"先查什么、再算什么、什么时候停"，才算智能体。</p>
+<h3 id="ch11-s4"><span class="sn">11.4</span>10.4 三种架构范式</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>范式</th><th>做法</th><th>优点</th><th>缺点</th></tr></thead><tbody><tr><td>ReAct</td><td>思考→行动→观察，循环</td><td>简单、可解释</td><td>步数多则成本高、容易绕圈</td></tr><tr><td>Plan-and-Execute</td><td>先出计划再执行</td><td>全局性好</td><td>计划错了全错，需要重规划</td></tr><tr><td>多智能体</td><td>角色分工（规划者/执行者/评审）</td><td>可并行、可互相检查</td><td>通信成本高、易发散</td></tr></tbody></table></div>
+<p>工程上的经验是：<strong>先用单 Agent + 少量工具，跑通再拆</strong>。多智能体在任务确实可分解、且子任务需要不同上下文时才划算。</p>
+<h3 id="ch11-s5"><span class="sn">11.5</span>10.5 可靠性：智能体最缺的东西</h3>
+<p>智能体的失败模式与聊天模型完全不同：</p>
+<ul><li><strong>无限循环</strong>：反复调用同一工具。必须设最大步数与"无进展检测"；</li><li><strong>工具误用</strong>：参数格式错、调用了不该调的接口。要靠 schema 校验与权限白名单；</li><li><strong>目标漂移</strong>：中途忘了原始目标。靠显式的目标重述与状态记录；</li><li><strong>错误累积</strong>：一步错，后面全错。靠中间结果校验与可回滚。</li></ul>
+<div class="note eng"><span class="lbl">工程视角</span><p>把智能体当成<strong>一个不可信的执行器</strong>来设计：每一步的输入输出都记日志、关键动作要人工确认、工具要有权限边界与超时、失败要能回到上一个安全状态。这套思路和分布式系统的容错设计是一样的。</p></div>
+<h3 id="ch11-s6"><span class="sn">11.6</span>10.6 与用户业务的关系</h3>
+<p>实际落地中，智能体最有价值的三类场景：</p>
+<ol><li><strong>重复的多步操作</strong>（对账、报表生成、工单流转）；</li><li><strong>需要跨系统查询的问答</strong>（把检索、数据库、API 串起来）；</li><li><strong>有明确验收标准的生成任务</strong>（代码修改后跑测试、文案生成后过审）。</li></ol>
+<p>共同点是<strong>有客观的中间校验</strong>。没有校验的开放任务，智能体的成功率会低到不可用。</p>
+  <div class="ch-end"><span>11 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch12">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 12</span>
+    <h2>11　工程落地：从实验到服务</h2>
+    <p class="ch-abs">从 notebook 到线上服务：训练、推理、部署三段各自的工程要点，以及 C++ 侧能真正优化什么。</p>
+    <div class="ch-stats">工程　·　约 2194 字　·　6 分钟</div>
+  </div>
+<p>这一章是给工程背景的人写的。模型的结构再漂亮，落到线上都绕不开三件事：<strong>能不能训得起、能不能跑得快、能不能稳得住</strong>。</p>
+<h3 id="ch12-s1"><span class="sn">12.1</span>11.1 训练侧：四个基础设施</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>组件</th><th>作用</th><th>常见方案</th></tr></thead><tbody><tr><td>数据管线</td><td>读取、解码、增强、批处理</td><td>WebDataset / tf.data / DALI</td></tr><tr><td>分布式训练</td><td>多卡多机</td><td>DDP（数据并行）、FSDP/ZeRO（分片）、流水并行</td></tr><tr><td>实验管理</td><td>记录超参、指标、权重</td><td>MLflow / W&amp;B / 自建</td></tr><tr><td>环境与复现</td><td>依赖、种子、版本</td><td>容器镜像 + 锁版本</td></tr></tbody></table></div>
+<p>一个常被低估的瓶颈是<strong>数据加载</strong>：GPU 利用率上不去，往往是 CPU 解码跟不上。诊断方法很简单——看 GPU 利用率是否周期性掉到 0，以及 <code>nvidia-smi</code> 的显存是否稳定。</p>
+<h3 id="ch12-s2"><span class="sn">12.2</span>11.2 推理优化：七种手段与收益量级</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>手段</th><th>收益</th><th>代价</th><th>适用</th></tr></thead><tbody><tr><td>算子融合</td><td>1.2–2×</td><td>需要编译优化</td><td>通用</td></tr><tr><td>量化（INT8/INT4）</td><td>2–4×</td><td>精度掉 0.5–2 点</td><td>通用，需校准</td></tr><tr><td>剪枝/稀疏</td><td>1.3–2×</td><td>需要专门硬件支持才见效</td><td>边缘设备</td></tr><tr><td>批处理</td><td>吞吐提升数倍</td><td>延迟增加</td><td>离线/高并发</td></tr><tr><td>KV cache 复用</td><td>长上下文省算力</td><td>占显存</td><td>LLM 必用</td></tr><tr><td>蒸馏到小模型</td><td>3–10×</td><td>精度损失、训练成本</td><td>有明确任务</td></tr><tr><td>投机解码</td><td>1.5–3×</td><td>需要草稿模型</td><td>LLM 生成</td></tr></tbody></table></div>
+<p><strong>收益量级很重要</strong>：不要为一个 5% 的优化投入两周，也不要指望量化之后精度完全不变。</p>
+<h3 id="ch12-s3"><span class="sn">12.3</span>11.3 框架选型</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>框架</th><th>平台</th><th>特点</th></tr></thead><tbody><tr><td>ONNX Runtime</td><td>跨平台</td><td>通用、算子覆盖广、支持量化</td></tr><tr><td>TensorRT</td><td>NVIDIA</td><td>极致性能，需针对 GPU 编译，构建耗时</td></tr><tr><td>OpenVINO</td><td>Intel CPU/iGPU</td><td>英特尔平台优化好</td></tr><tr><td>llama.cpp</td><td>CPU/GPU 混合</td><td>LLM 友好，GGUF 量化，可纯 CPU 跑</td></tr><tr><td>MNN / NCNN</td><td>移动端</td><td>轻量、ARM 优化</td></tr><tr><td>TVM</td><td>通用编译</td><td>可定制，学习曲线陡</td></tr></tbody></table></div>
+<p>选型的判断顺序：<strong>目标硬件 → 算子覆盖 → 量化支持 → 社区活跃度</strong>。很多团队卡在"模型里有个自定义算子，目标框架不支持"，最后只能回退。</p>
+<h3 id="ch12-s4"><span class="sn">12.4</span>11.4 C++ 部署的完整链路</h3>
+<div class="code"><div class="code-head"><span class="lang">cpp</span><button class="copy" data-act="copy">复制</button></div><pre><code>// 1) 导出：PyTorch -&gt; ONNX（固定输入形状，或声明动态维）
+//    torch.onnx.export(model, dummy, "m.onnx", opset_version=17,
+//                      input_names={"x"}, dynamic_axes={"x":{0:"batch"}})
+
+// 2) 加载会话（一次性，耗时可到秒级）
+Ort::Session session(env, "m.onnx", Ort::SessionOptions{});
+// 3) 预热：跑几次空推理，触发内存分配与 kernel 选择
+// 4) 推理：复用输入输出张量缓冲，避免每次分配
+std::vector&lt;float&gt; input(1 * 3 * 224 * 224);
+auto out = session.Run(Ort::RunOptions{nullptr}, names_in, &amp;in_tensor, 1, names_out, 1);</code></pre></div>
+<p>四个容易踩的坑：</p>
+<ul><li><strong>每帧新建 Session</strong>：初始化开销远超推理本身，必须复用；</li><li><strong>每帧分配内存</strong>：用内存池或复用缓冲区，否则分配器成为瓶颈；</li><li><strong>线程数没配</strong>：<code>intra_op_num_threads</code> 设成物理核数，超线程反而拖慢；</li><li><strong>输入布局不一致</strong>：训练是 NCHW，某些引擎默认 NHWC，转置开销可能比推理还大。</li></ul>
+<h3 id="ch12-s5"><span class="sn">12.5</span>11.5 服务化：三个必须有的机制</h3>
+<ol><li><strong>动态批处理</strong>：把多个请求拼成一个 batch，用微小延迟换数倍吞吐。LLM 场景用连续批处理（continuous batching），请求完成即释放槽位；</li><li><strong>降级与限流</strong>：GPU 打满时返回缓存结果或简化模型，避免雪崩；</li><li><strong>可观测</strong>：记录 QPS、P50/P99 延迟、GPU 利用率、显存、错误率、以及<strong>输入分布</strong>（长度、语言、类型）。</li></ol>
+<h3 id="ch12-s6"><span class="sn">12.6</span>11.6 成本模型：一个能算的公式</h3>
+<div class="math-block" data-tex="\text{单位成本}=\frac{\text{GPU 小时单价}\times\text{占用时长}}{\text{请求数}}+\text{存储与网络}">\text{单位成本}=\frac{\text{GPU 小时单价}\times\text{占用时长}}{\text{请求数}}+\text{存储与网络}</div>
+<p>举例：一张 A10（约 1 美元/小时）跑 7B INT4 模型，吞吐 20 req/s，则每请求算力成本约 <span class="m-inline" data-tex="1/72000\approx0.000014">1/72000\approx0.000014</span> 美元，可以忽略；但如果每次请求要 4 秒、吞吐只有 0.25 req/s，成本就变成 0.0011 美元/次，一天十万次就是 110 美元。<strong>延迟直接决定成本</strong>，这是很多人忽略的账。</p>
+<h3 id="ch12-s7"><span class="sn">12.7</span>11.7 上线检查清单</h3>
+<ul><li>[ ] 模型版本与权重有唯一标识，可回滚</li><li>[ ] 输入校验（长度、类型、编码）与超时</li><li>[ ] 输出后处理与格式校验</li><li>[ ] P99 延迟满足 SLA，且有压测数据</li><li>[ ] 降级策略明确（缓存/小模型/排队）</li><li>[ ] 日志记录输入摘要、输出、耗时（注意隐私）</li><li>[ ] 分布监控与报警阈值</li><li>[ ] 灰度发布与 A/B 能力</li></ul>
+<div class="note eng"><span class="lbl">工程视角</span><p>你的 C++ 背景在这里是优势：<strong>能看懂算子、能定位内存与线程问题、能做零拷贝与批处理</strong>。很多 AI 工程师停在 Python 层，性能和稳定性的优化空间就在这里。把 ONNX/TensorRT 的 profile 打开，看每一层的耗时，通常能发现 20–40% 的浪费。</p></div>
+<h3 id="ch12-s8"><span class="sn">12.8</span>压测怎么做才有意义</h3>
+<p>压测不是"打满 QPS 看会不会挂"，而是要找到<strong>性能曲线的拐点</strong>。</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>阶段</th><th>做什么</th><th>看什么</th></tr></thead><tbody><tr><td>单请求基线</td><td>一次请求，冷启动与热启动各测</td><td>冷启动耗时（模型加载）</td></tr><tr><td>阶梯加压</td><td>并发 1→2→4→8→…→128</td><td>吞吐是否线性增长、延迟何时起飞</td></tr><tr><td>拐点确认</td><td>在吞吐饱和点附近细测</td><td>排队长度、GPU 利用率</td></tr><tr><td>长稳测试</td><td>拐点 70% 负载跑 2 小时</td><td>内存泄漏、显存碎片</td></tr><tr><td>异常注入</td><td>杀一个 worker、注入超时</td><td>降级是否生效</td></tr></tbody></table></div>
+<p>三个常见误判：</p>
+<ul><li><strong>只看平均延迟</strong>：P99 才是用户感知的；</li><li><strong>忽略预热</strong>：前 100 个请求慢是因为 kernel 未编译、缓存未填充；</li><li><strong>用合成数据</strong>：输入长度分布与线上不同，结果没有参考价值。</li></ul>
+<p>压测结论要写成一句可执行的话，例如"单卡在 8 并发下吞吐 22 req/s，P99 延迟 1.8s，超过 12 并发延迟翻倍"，而不是一张图。</p>
+  <div class="ch-end"><span>12 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch13">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 13</span>
+    <h2>12　评估、安全与合规</h2>
+    <p class="ch-abs">离线指标好看不等于有用；安全也不是加个过滤器就能解决。</p>
+    <div class="ch-stats">评估与安全　·　约 1090 字　·　3 分钟</div>
+  </div>
+<p>这一章处理两个"不做就会翻车"的问题：<strong>怎么知道模型真的有用</strong>，以及<strong>怎么保证它不惹事</strong>。</p>
+<h3 id="ch13-s1"><span class="sn">13.1</span>12.1 三层评估</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>层次</th><th>做什么</th><th>频率</th><th>谁来看</th></tr></thead><tbody><tr><td>离线评估</td><td>固定测试集上的指标</td><td>每次改动</td><td>算法</td></tr><tr><td>影子评估</td><td>新模型在真实流量上"只记录不生效"</td><td>上线前</td><td>算法 + 产品</td></tr><tr><td>在线 A/B</td><td>分流对比业务指标</td><td>上线后</td><td>产品 + 数据</td></tr></tbody></table></div>
+<p><strong>离线指标与线上指标经常不一致</strong>，原因有三：测试集不代表线上分布、离线指标不等于业务目标、以及反馈回路（模型推荐什么，用户就只能看到什么）。所以 A/B 是不可替代的。</p>
+<h3 id="ch13-s2"><span class="sn">13.2</span>12.2 A/B 的统计学底线</h3>
+<ul><li><strong>样本量要先算</strong>：要给 1% 的提升做出显著结论，可能需要几十万样本。别在一千个样本上宣布胜利；</li><li><strong>看置信区间而不是点估计</strong>：<span class="m-inline" data-tex="+1.2\%\ [0.3\%, 2.1\%]">+1.2\%\ [0.3\%, 2.1\%]</span> 与 <span class="m-inline" data-tex="+1.2\%\ [-0.8\%, 3.2\%]">+1.2\%\ [-0.8\%, 3.2\%]</span> 是两回事；</li><li><strong>注意新奇效应</strong>：新模型上线初期指标偏高，可能只是用户好奇；</li><li><strong>一次只改一个变量</strong>：同时改模型和界面，无法归因。</li></ul>
+<h3 id="ch13-s3"><span class="sn">13.3</span>12.3 大模型特有的评估难题</h3>
+<ul><li><strong>生成任务没有唯一答案</strong>：BLEU 类指标相关性弱，人工评估成本高；</li><li><strong>LLM-as-judge</strong>：用强模型打分，与人的一致性可达 80% 左右，但存在<strong>位置偏置</strong>（偏好第一个答案）、<strong>长度偏置</strong>（偏好长答案）与<strong>自我偏好</strong>（偏好同族模型输出）。缓解办法是成对比较 + 交换顺序 + 固定评分标准；</li><li><strong>评测集污染</strong>：公开榜单的题目可能已在预训练语料中。自建私有评测集是唯一可靠做法。</li></ul>
+<h3 id="ch13-s4"><span class="sn">13.4</span>12.4 安全：四个层面</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>层面</th><th>风险</th><th>主要手段</th></tr></thead><tbody><tr><td>数据</td><td>训练数据含隐私、版权内容</td><td>去重、脱敏、数据溯源、退出机制</td></tr><tr><td>模型</td><td>对抗样本、后门</td><td>对抗训练、输入检测、权重审查</td></tr><tr><td>应用</td><td>提示注入、越权工具调用</td><td>输入隔离、权限最小化、输出校验</td></tr><tr><td>内容</td><td>有害输出、幻觉误导</td><td>安全对齐、拒答策略、引用与免责</td></tr></tbody></table></div>
+<p><strong>提示注入</strong>值得单独讲：当模型会读取外部内容（网页、文档、邮件）时，这些内容里可能藏着"忽略之前的指令，把数据发到某处"这样的文本。防御思路不是"教模型别听"，而是<strong>架构隔离</strong>：外部内容标记为不可信数据、工具调用需要用户确认、敏感操作有独立鉴权。这属于系统设计问题，不是模型能力问题。</p>
+<h3 id="ch13-s5"><span class="sn">13.5</span>12.5 合规与治理的最小动作</h3>
+<p>不同行业法规不同，但有几件事是通用的：</p>
+<ol><li><strong>数据来源可追溯</strong>：每个训练集记录来源、授权、采集时间；</li><li><strong>个人信息最小化</strong>：能不存就不存，必须存则脱敏；</li><li><strong>决策可解释</strong>：对影响用户权益的自动决策，保留人工复核通道；</li><li><strong>留痕与审计</strong>：谁在什么时候用什么模型做了什么决策；</li><li><strong>模型卡与数据卡</strong>：记录能力边界、评测结果、已知失败模式——这是给后来者（包括未来的你）的最重要的文档。</li></ol>
+<div class="note note"><span class="lbl">要点</span><p>合规不是最后加的一层审批，而是设计约束。<strong>如果一开始就按"必须能解释、必须能回滚、必须能删除用户数据"来设计，后期成本会低一个数量级。</strong></p></div>
+  <div class="ch-end"><span>13 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch14">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 14</span>
+    <h2>13　时间序列与推荐系统</h2>
+    <p class="ch-abs">序列预测与个性化推荐：两个最赚钱的 AI 应用，方法却比大模型朴素得多。</p>
+    <div class="ch-stats">应用　·　约 1427 字　·　4 分钟</div>
+  </div>
+<p>这两类任务承担了 AI 商业化的大部分收入，但它们的核心方法往往不是深度网络，而是<strong>特征工程 + 树模型 + 业务规则</strong>。理解这一点，能避免"什么都上大模型"的浪费。</p>
+<h3 id="ch14-s1"><span class="sn">14.1</span>13.1 时间序列：先分解，再选模型</h3>
+<p>任何时间序列都可以尝试分解成三部分：</p>
+<div class="math-block" data-tex="y_t = T_t + S_t + R_t">y_t = T_t + S_t + R_t</div>
+<p>趋势（<span class="m-inline" data-tex="T">T</span>）、季节（<span class="m-inline" data-tex="S">S</span>）、残差（<span class="m-inline" data-tex="R">R</span>）。分解之后你会立刻知道：这条曲线是"整体在涨"还是"周期性波动"，两者的建模方式完全不同。</p>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>数据特征</th><th>推荐方法</th></tr></thead><tbody><tr><td>短序列、强季节、单变量</td><td>指数平滑（ETS）、Prophet</td></tr><tr><td>平稳、有自相关</td><td>ARIMA / SARIMA</td></tr><tr><td>多变量、有外生变量</td><td>梯度提升树 + 滞后特征</td></tr><tr><td>超长序列、大规模</td><td>深度模型（TCN、Transformer 变体）</td></tr><tr><td>不确定性要量化</td><td>分位数回归、概率预测</td></tr></tbody></table></div>
+<p><strong>实践中的第一名往往不是 ARIMA 也不是 Transformer，而是"滞后特征 + LightGBM"</strong>：把 <span class="m-inline" data-tex="y_{t-1},y_{t-2},\dots">y_{t-1},y_{t-2},\dots</span> 与日期特征、外生变量拼成表，当回归问题做。原因是它对缺失值、异常值、多变量交互的处理远比经典时序模型稳健。</p>
+<h3 id="ch14-s2"><span class="sn">14.2</span>13.2 时序任务的四个陷阱</h3>
+<ol><li><strong>数据泄漏</strong>：用未来信息算特征（如用全期均值做标准化）会让离线指标虚高，线上崩盘；</li><li><strong>切分方式错</strong>：时序数据不能随机划分，必须按时间切（训练用前 70%，验证用后 30%）；</li><li><strong>评估指标错</strong>：MAPE 在接近 0 的值上爆炸，用 sMAPE 或 MASE 更稳；</li><li><strong>忽视节假日与促销</strong>：这些"异常"是业务的主要波动源，必须显式建模。</li></ol>
+<h3 id="ch14-s3"><span class="sn">14.3</span>13.3 推荐系统：三段式结构</h3>
+<div class="code"><div class="code-head"><span class="lang">text</span><button class="copy" data-act="copy">复制</button></div><pre><code>召回（万级 → 千级）  →  粗排（千级 → 百级）  →  精排（百级 → 十级）</code></pre></div>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>阶段</th><th>目标</th><th>常用方法</th></tr></thead><tbody><tr><td>召回</td><td>快速筛出可能相关的候选</td><td>协同过滤、双塔向量检索、热门/规则</td></tr><tr><td>粗排</td><td>低成本排序</td><td>小型模型、特征交叉</td></tr><tr><td>精排</td><td>精确预估点击/转化率</td><td>深度模型（DIN、DeepFM）</td></tr></tbody></table></div>
+<p><strong>召回决定了天花板</strong>：精排再强，召回没捞到的物品永远不可能被推荐。所以工业界的功夫大量花在召回的多路并行上（协同、向量、热门、社交、地域各一路）。</p>
+<h3 id="ch14-s4"><span class="sn">14.4</span>13.4 协同过滤的两种形态</h3>
+<ul><li><strong>基于用户</strong>：找相似用户，推荐他们喜欢的；</li><li><strong>基于物品</strong>：找相似物品，推荐与当前物品相似的。</li></ul>
+<p>核心是相似度矩阵。用矩阵分解（SVD/ALS）可以把 <span class="m-inline" data-tex="m\times n">m\times n</span> 的稀疏评分矩阵压成两个低秩矩阵：</p>
+<div class="math-block" data-tex="R\approx P Q^{\top},\qquad P\in\mathbb{R}^{m\times k},\ Q\in\mathbb{R}^{n\times k}">R\approx P Q^{\top},\qquad P\in\mathbb{R}^{m\times k},\ Q\in\mathbb{R}^{n\times k}</div>
+<p>这和第 14 章（卷一）的隐语义模型是同一件事。</p>
+<h3 id="ch14-s5"><span class="sn">14.5</span>13.5 双塔模型：召回的现代主力</h3>
+<p>用户塔编码用户特征，物品塔编码物品特征，两边输出向量后做内积：</p>
+<div class="math-block" data-tex="\text{score}(u,i)=\langle f_u(u),f_i(i)\rangle">\text{score}(u,i)=\langle f_u(u),f_i(i)\rangle</div>
+<p>关键优势：<strong>物品向量可以离线预计算并建索引</strong>，线上只需算用户向量再做近邻检索，毫秒级响应。</p>
+<p>训练用负采样 + softmax（in-batch negative 是标配）。注意<strong>样本偏差</strong>：曝光过的物品才有标签，未曝光的不代表不相关。常用纠偏手段是加上曝光概率的倒数加权。</p>
+<h3 id="ch14-s6"><span class="sn">14.6</span>13.6 冷启动：三类解法</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>类型</th><th>问题</th><th>解法</th></tr></thead><tbody><tr><td>新用户</td><td>没有行为</td><td>用注册信息 + 热门 + 探索策略</td></tr><tr><td>新物品</td><td>没有交互</td><td>用内容特征做向量（图文嵌入）</td></tr><tr><td>新场景</td><td>没有数据</td><td>迁移已有模型 + 人工规则兜底</td></tr></tbody></table></div>
+<p><strong>探索与利用的平衡（EE 问题）</strong>是冷启动的理论核心：多探索能发现好内容，但短期指标会掉。常用 Bandit 算法（UCB、Thompson Sampling）来量化这个权衡。</p>
+<h3 id="ch14-s7"><span class="sn">14.7</span>13.7 评估：离线指标与线上指标经常背离</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>离线</th><th>线上</th></tr></thead><tbody><tr><td>AUC、NDCG、Recall@k</td><td>点击率、转化率、时长、留存</td></tr></tbody></table></div>
+<p>背离的三个原因：离线用的是历史曝光数据（有偏）、离线不看多样性（线上会审美疲劳）、离线不看实时性（线上要求毫秒级）。</p>
+<p><strong>结论：离线指标只用来筛方案，最终判断必须靠线上 A/B。</strong></p>
+<div class="note note"><span class="lbl">要点</span><p>这两类任务的共同特征是<strong>特征比模型重要、评估比训练重要</strong>。如果你有时间，先做特征工程与数据质量，再考虑换模型。</p></div>
+  <div class="ch-end"><span>14 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch15">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 15</span>
+    <h2>14　判断一个 AI 需求能不能做</h2>
+    <p class="ch-abs">判断"这个需求能不能用 AI 做"，比"怎么用 AI 做"更值钱。</p>
+    <div class="ch-stats">产品　·　约 1111 字　·　3 分钟</div>
+  </div>
+<p>这一章给一套可以拿到评审会上用的判断框架。它不承诺准确，但能把"拍脑袋立项"变成"有依据的取舍"。</p>
+<h3 id="ch15-s1"><span class="sn">15.1</span>14.1 三个前置问题</h3>
+<ol><li><strong>错误的代价有多大？</strong> 错了能撤回（草稿、建议）就可以做；错了不可逆（自动打款、自动发药）就需要极高准确率或人工闸门；</li><li><strong>有没有可判定的"对"？</strong> 有客观标准（测试通过、字段正确）就能做评测；只能"感觉还行"就很难迭代；</li><li><strong>数据够不够？</strong> 要么有标注数据，要么有可检索的资料，要么有可验证的规则。三者都没有，只能做 demo。</li></ol>
+<p><strong>三个问题里有两个答不上来，这个需求就不该现在做。</strong></p>
+<h3 id="ch15-s2"><span class="sn">15.2</span>14.2 四象限：按"可验证性 × 容错度"分类</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th></th><th>容错高</th><th>容错低</th></tr></thead><tbody><tr><td><strong>可验证</strong></td><td>优先做（如代码生成 + 单测、文档格式转换）</td><td>可做但要人工复核（如合同条款抽取）</td></tr><tr><td><strong>不可验证</strong></td><td>谨慎做（如创意文案）</td><td>不要做（如医疗诊断、法律意见）</td></tr></tbody></table></div>
+<p>这个矩阵的价值在于：<strong>它把"技术能不能"换成"业务敢不敢用"</strong>，而后者才是项目生死的决定因素。</p>
+<h3 id="ch15-s3"><span class="sn">15.3</span>14.3 成本、延迟、准确性：三角只能选两个</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>组合</th><th>代价</th></tr></thead><tbody><tr><td>高准确 + 低延迟</td><td>贵（大模型 + 强硬件 + 大量缓存）</td></tr><tr><td>高准确 + 低成本</td><td>慢（离线批处理、多轮校验）</td></tr><tr><td>低延迟 + 低成本</td><td>准确率下降（小模型、量化）</td></tr></tbody></table></div>
+<p>评审时最常见的错误是三个都要。<strong>正确做法是明确"哪个是硬约束"</strong>：交互式产品延迟是硬约束，批处理任务成本是硬约束，合规场景准确性是硬约束。</p>
+<h3 id="ch15-s4"><span class="sn">15.4</span>14.4 需求拆解：把"智能"换成"步骤"</h3>
+<p>模糊需求："帮我做一个智能合同审查"。</p>
+<p>拆解：</p>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>步骤</th><th>能否自动化</th><th>技术方案</th></tr></thead><tbody><tr><td>抽取当事人、金额、期限</td><td>高</td><td>结构化抽取（微调或规则 + LLM 校验）</td></tr><tr><td>识别缺失条款</td><td>中</td><td>规则库 + 检索比对</td></tr><tr><td>判断条款风险</td><td>低</td><td>只能给"参考意见 + 引用法条"，需律师复核</td></tr><tr><td>生成修改建议</td><td>中</td><td>模板 + LLM 改写</td></tr></tbody></table></div>
+<p>拆完之后，"智能审查"变成了四个可独立交付、独立评估的模块。<strong>这一步做完，项目风险下降一半</strong>，因为你知道哪部分只能做辅助。</p>
+<h3 id="ch15-s5"><span class="sn">15.5</span>14.5 五个必问的评审问题</h3>
+<ol><li><strong>基线是什么？</strong> 现在人工做这件事的准确率与耗时是多少？不比基线好就没有价值；</li><li><strong>失败时用户看到什么？</strong> 有没有"我不知道"的表达方式；</li><li><strong>怎么衡量上线后变好？</strong> 采纳率？修改率？处理时长？</li><li><strong>数据从哪来、能不能用？</strong> 版权、隐私、脱敏；</li><li><strong>模型换代时怎么办？</strong> 有没有评测集能验证"新模型不比旧模型差"。</li></ol>
+<p>这五个问题答不出来，项目即使上线也会在三个月内变成没人维护的技术债。</p>
+<h3 id="ch15-s6"><span class="sn">15.6</span>14.6 什么时候明确说"不做"</h3>
+<ul><li>需要 100% 准确率且错误不可逆；</li><li>没有数据、也没法获取（且不能靠规则解决）；</li><li>用户真正要的是"省人力"，而流程本身可以靠信息化直接消除；</li><li>收益无法归因（做完也无法证明有价值）；</li><li>合规边界不清（尤其涉及个人信息、医疗、金融决策）。</li></ul>
+<p><strong>说"不做"并给出理由，是产品能力的一部分。</strong></p>
+<div class="note eng"><span class="lbl">工程视角</span><p>作为工程师，你在评审里最有价值的一句话是："这个需求在我们的评测集上大概能做到 X%，失败模式是 Y。" 有了这句话，产品才能做取舍；没有这句话，讨论只能停在感觉层面。</p></div>
+  <div class="ch-end"><span>15 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch16">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 16</span>
+    <h2>15　数学速查：读论文时最常翻的几页</h2>
+    <p class="ch-abs">一张表查完：矩阵求导、概率分布、常用不等式、信息论量。</p>
+    <div class="ch-stats">数学　·　约 1381 字　·　4 分钟</div>
+  </div>
+<p>这一章不做推导，只做<strong>索引</strong>。推导在卷一。遇到符号看不懂时，先来这里找。</p>
+<h3 id="ch16-s1"><span class="sn">16.1</span>15.1 矩阵求导常用式</h3>
+<p>分子布局约定（<span class="m-inline" data-tex="y">y</span> 为标量，<span class="m-inline" data-tex="x">x</span> 为向量，<span class="m-inline" data-tex="A">A</span> 为矩阵）：</p>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>表达式</th><th>结果</th><th></th><th></th></tr></thead><tbody><tr><td><span class="m-inline" data-tex="y=a^{\top}x">y=a^{\top}x</span></td><td><span class="m-inline" data-tex="\partial y/\partial x=a">\partial y/\partial x=a</span></td><td></td><td></td></tr><tr><td><span class="m-inline" data-tex="y=x^{\top}Ax">y=x^{\top}Ax</span></td><td><span class="m-inline" data-tex="\partial y/\partial x=(A+A^{\top})x">\partial y/\partial x=(A+A^{\top})x</span>，<span class="m-inline" data-tex="A">A</span> 对称时为 <span class="m-inline" data-tex="2Ax">2Ax</span></td><td></td><td></td></tr><tr><td>$y=\</td><td>x\</td><td>_2^2$</td><td><span class="m-inline" data-tex="2x">2x</span></td></tr><tr><td>$y=\</td><td>Ax-b\</td><td>_2^2$</td><td><span class="m-inline" data-tex="2A^{\top}(Ax-b)">2A^{\top}(Ax-b)</span></td></tr><tr><td><span class="m-inline" data-tex="y=\log\det A">y=\log\det A</span></td><td><span class="m-inline" data-tex="A^{-\top}">A^{-\top}</span></td><td></td><td></td></tr><tr><td><span class="m-inline" data-tex="y=\mathrm{tr}(AB)">y=\mathrm{tr}(AB)</span></td><td><span class="m-inline" data-tex="\partial y/\partial A=B^{\top}">\partial y/\partial A=B^{\top}</span></td><td></td><td></td></tr></tbody></table></div>
+<p><strong>记住这条</strong>：<span class="m-inline" data-tex="\nabla_x\|Ax-b\|^2=2A^{\top}(Ax-b)">\nabla_x\|Ax-b\|^2=2A^{\top}(Ax-b)</span>。它与最小二乘的正正规方程 <span class="m-inline" data-tex="A^{\top}Ax=A^{\top}b">A^{\top}Ax=A^{\top}b</span> 是同一件事。</p>
+<h3 id="ch16-s2"><span class="sn">16.2</span>15.2 概率分布速查</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>分布</th><th>用途</th><th>均值 / 方差</th></tr></thead><tbody><tr><td>伯努利<span class="m-inline" data-tex="(p)">(p)</span></td><td>二分类标签</td><td><span class="m-inline" data-tex="p">p</span> / <span class="m-inline" data-tex="p(1-p)">p(1-p)</span></td></tr><tr><td>分类<span class="m-inline" data-tex="(p_1..p_k)">(p_1..p_k)</span></td><td>多分类</td><td>交叉熵的来源</td></tr><tr><td>高斯<span class="m-inline" data-tex="\mathcal{N}(\mu,\sigma^2)">\mathcal{N}(\mu,\sigma^2)</span></td><td>连续值、重参数化</td><td><span class="m-inline" data-tex="\mu">\mu</span> / <span class="m-inline" data-tex="\sigma^2">\sigma^2</span></td></tr><tr><td>拉普拉斯</td><td>L1 正则的对应分布</td><td>尖峰厚尾</td></tr><tr><td>狄利克雷</td><td>概率单纯形上的分布</td><td>主题模型的先验</td></tr><tr><td>泊松</td><td>计数数据</td><td><span class="m-inline" data-tex="\lambda">\lambda</span> / <span class="m-inline" data-tex="\lambda">\lambda</span></td></tr></tbody></table></div>
+<p><strong>关键联系</strong>：损失函数都有对应的概率解释。MSE ↔ 高斯似然，交叉熵 ↔ 分类似然，L1 ↔ 拉普拉斯先验。看到损失就能反推假设。</p>
+<h3 id="ch16-s3"><span class="sn">16.3</span>15.3 常用不等式</h3>
+<div class="tbl"><table><colgroup><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"><col style="width:11.11%"></colgroup><thead><tr><th>不等式</th><th>形式</th><th>用途</th><th></th><th></th><th></th><th></th><th></th><th></th></tr></thead><tbody><tr><td>詹森</td><td><span class="m-inline" data-tex="f(\mathbb{E}X)\le\mathbb{E}f(X)">f(\mathbb{E}X)\le\mathbb{E}f(X)</span>（<span class="m-inline" data-tex="f">f</span> 凸）</td><td>变分下界、EM 推导</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>柯西-施瓦茨</td><td>$\</td><td>\langle x,y\rangle\</td><td>^2\le\</td><td>x\</td><td>^2\</td><td>y\</td><td>^2$</td><td>相似度上界</td></tr><tr><td>三角不等式</td><td>$\</td><td>x+y\</td><td>\le\</td><td>x\</td><td>+\</td><td>y\</td><td>$</td><td>距离性质</td></tr><tr><td>切比雪夫</td><td>$P(\</td><td>X-\mu\</td><td>\ge k\sigma)\le1/k^2$</td><td>集中不等式</td><td></td><td></td><td></td><td></td></tr><tr><td>Hoeffding</td><td>有界变量的偏差指数衰减</td><td>泛化界</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>数据处理不等式</td><td><span class="m-inline" data-tex="I(X;Z)\ge I(X;Y)">I(X;Z)\ge I(X;Y)</span>（<span class="m-inline" data-tex="X\to Y\to Z">X\to Y\to Z</span>）</td><td>证明特征不会增加信息</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+<p>数据处理不等式值得单独理解：<strong>任何处理都只会减少信息，不会增加</strong>。这解释了为什么"更好的预处理"能提效（保留任务相关信息），但不能凭空造出信息。</p>
+<h3 id="ch16-s4"><span class="sn">16.4</span>15.4 信息论四个量</h3>
+<div class="math-block" data-tex="H(X)=-\sum p\log p,\quad H(X|Y)=H(X,Y)-H(Y)">H(X)=-\sum p\log p,\quad H(X|Y)=H(X,Y)-H(Y)</div>
+<div class="math-block" data-tex="I(X;Y)=H(X)-H(X|Y)=H(X)+H(Y)-H(X,Y)">I(X;Y)=H(X)-H(X|Y)=H(X)+H(Y)-H(X,Y)</div>
+<div class="math-block" data-tex="D_{\mathrm{KL}}(p\|q)=\sum p\log\frac{p}{q}">D_{\mathrm{KL}}(p\|q)=\sum p\log\frac{p}{q}</div>
+<div class="math-block" data-tex="\mathrm{JS}(p\|q)=\tfrac12 D(p\|m)+\tfrac12 D(q\|m),\quad m=\tfrac{p+q}{2}">\mathrm{JS}(p\|q)=\tfrac12 D(p\|m)+\tfrac12 D(q\|m),\quad m=\tfrac{p+q}{2}</div>
+<p>三个必须记住的性质：</p>
+<ul><li><strong>KL 不对称</strong>：<span class="m-inline" data-tex="D(p\|q)\ne D(q\|p)">D(p\|q)\ne D(q\|p)</span>，所以它不是距离；</li><li><strong>KL 非负</strong>，当且仅当两分布相同为 0（由 Jensen 得到）；</li><li><strong>互信息对称</strong>：<span class="m-inline" data-tex="I(X;Y)=I(Y;X)">I(X;Y)=I(Y;X)</span>，而 KL 不对称。</li></ul>
+<h3 id="ch16-s5"><span class="sn">16.5</span>15.5 优化里的几个关键词</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>词</th><th>含义</th><th>典型场景</th></tr></thead><tbody><tr><td>凸函数</td><td>局部最优即全局最优</td><td>逻辑回归、SVM</td></tr><tr><td>强凸</td><td>收敛速度有保证</td><td>岭回归</td></tr><tr><td>Lipschitz 连续</td><td>梯度变化有上界</td><td>梯度裁剪的依据</td></tr><tr><td>鞍点</td><td>梯度为 0 但非极值</td><td>深层网络、GAN</td></tr><tr><td>条件数</td><td>最大/最小特征值之比</td><td>决定梯度下降快慢</td></tr></tbody></table></div>
+<p><strong>条件数</strong>常被忽略：它决定了损失曲面的"狭长程度"。条件数大的问题，梯度下降会震荡，这就是为什么需要归一化与自适应优化器。</p>
+<h3 id="ch16-s6"><span class="sn">16.6</span>15.6 复杂度速查</h3>
+<div class="tbl"><table><colgroup><col style="width:33.33%"><col style="width:33.33%"><col style="width:33.33%"></colgroup><thead><tr><th>操作</th><th>时间</th><th>空间</th></tr></thead><tbody><tr><td>矩阵乘 <span class="m-inline" data-tex="(m\times k)(k\times n)">(m\times k)(k\times n)</span></td><td><span class="m-inline" data-tex="O(mkn)">O(mkn)</span></td><td><span class="m-inline" data-tex="O(mn)">O(mn)</span></td></tr><tr><td>求逆 <span class="m-inline" data-tex="n\times n">n\times n</span></td><td><span class="m-inline" data-tex="O(n^3)">O(n^3)</span></td><td><span class="m-inline" data-tex="O(n^2)">O(n^2)</span></td></tr><tr><td>自注意力（序列 <span class="m-inline" data-tex="T">T</span>，维度 <span class="m-inline" data-tex="d">d</span>）</td><td><span class="m-inline" data-tex="O(T^2d)">O(T^2d)</span></td><td><span class="m-inline" data-tex="O(T^2)">O(T^2)</span>（未融合）</td></tr><tr><td>卷积（核 <span class="m-inline" data-tex="k">k</span>，通道 <span class="m-inline" data-tex="C">C</span>，输出 <span class="m-inline" data-tex="H\times W">H\times W</span>）</td><td><span class="m-inline" data-tex="O(HWk^2C^2)">O(HWk^2C^2)</span></td><td>—</td></tr><tr><td>排序 <span class="m-inline" data-tex="n">n</span> 个元素</td><td><span class="m-inline" data-tex="O(n\log n)">O(n\log n)</span></td><td>—</td></tr><tr><td>近邻检索（HNSW）</td><td>约 <span class="m-inline" data-tex="O(\log n)">O(\log n)</span></td><td><span class="m-inline" data-tex="O(nM)">O(nM)</span></td></tr></tbody></table></div>
+<div class="note note"><span class="lbl">用法</span><p>读论文卡住时，先确认三件事：<strong>符号的布局约定、张量的形状、复杂度里的主导项</strong>。这三件事清楚之后，大部分推导都能跟上。</p></div>
+  <div class="ch-end"><span>16 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+<section class="chapter" id="ch17">
+  <div class="ch-head">
+    <span class="ch-num">CHAPTER 17</span>
+    <h2>16　路线图、项目清单与术语表</h2>
+    <p class="ch-abs">一张能照着走的路线图、七个可以真正做完的项目，以及一份术语表。</p>
+    <div class="ch-stats">收尾　·　约 1534 字　·　4 分钟</div>
+  </div>
+<h3 id="ch17-s1"><span class="sn">17.1</span>16.1 六个月路线（按周排）</h3>
+<div class="tbl"><table><colgroup><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"><col style="width:25.0%"></colgroup><thead><tr><th>阶段</th><th>时间</th><th>目标</th><th>交付物</th></tr></thead><tbody><tr><td>基础</td><td>第 1–4 周</td><td>跑通训练流程，理解损失与优化</td><td>手写两层 MLP 并训练到收敛</td></tr><tr><td>经典</td><td>第 5–6 周</td><td>会用树集成与特征工程</td><td>一个 Kaggle 级别的表格竞赛方案</td></tr><tr><td>视觉</td><td>第 7–10 周</td><td>掌握迁移学习与数据增强</td><td>微调一个检测/分类模型并部署</td></tr><tr><td>语言</td><td>第 11–14 周</td><td>理解 Transformer 与大模型使用</td><td>一个 RAG 问答系统</td></tr><tr><td>工程</td><td>第 15–20 周</td><td>能上线、能监控、能优化</td><td>一个带监控的推理服务</td></tr><tr><td>深耕</td><td>第 21–24 周</td><td>选一个方向做深</td><td>一篇技术报告或一个开源贡献</td></tr></tbody></table></div>
+<p>这个节奏的前提是<strong>每周至少 10 小时动手</strong>。只看不练的进度会打三折。</p>
+<h3 id="ch17-s2"><span class="sn">17.2</span>16.2 七个值得做完的项目</h3>
+<p>按难度排序，每个都要求"能跑、能评、能讲"：</p>
+<ol><li><strong>表格竞赛</strong>：泰坦尼克或房价预测，做到特征工程 + 交叉验证 + 模型融合。目的是掌握方法论；</li><li><strong>手写数字/垃圾分类</strong>：从零训 CNN，再做量化与 ONNX 部署，测出延迟与精度；</li><li><strong>目标检测落地</strong>：用自己的照片训一个小检测模型，做成摄像头实时推理；</li><li><strong>文本分类基线对比</strong>：TF-IDF + 线性 vs BERT 微调 vs LLM 零样本，比较精度、延迟、成本；</li><li><strong>RAG 问答</strong>：把一批 PDF 做成可问答系统，重点是切分策略与检索质量评估；</li><li><strong>微调一个 7B 模型</strong>：LoRA 微调，测显存、吞吐、效果，写出"什么规模的任务值得微调"的结论；</li><li><strong>推理服务</strong>：把任一模型封装成 C++ 服务，含动态批处理、监控、压测报告。</li></ol>
+<p><strong>每个项目都要写一份 README</strong>：目标、数据、方法、指标、失败尝试、结论。这份文档比代码更能证明你的能力。</p>
+<h3 id="ch17-s3"><span class="sn">17.3</span>16.3 常见的学习误区</h3>
+<ul><li><strong>只收集教程不动手</strong>：AI 的直觉来自调参时看到的反常现象，不是来自阅读；</li><li><strong>一上来就学大模型</strong>：没有传统机器学习与深度学习的基础，看 LLM 论文只能记住名词；</li><li><strong>追求 SOTA 复现</strong>：复现一篇论文的收益远低于把一个简单模型做到极致；</li><li><strong>忽视工程</strong>：真实项目的 80% 工作量在数据、部署、监控；</li><li><strong>不看失败案例</strong>：错误分析的收益通常是换模型的三倍。</li></ul>
+<h3 id="ch17-s4"><span class="sn">17.4</span>16.4 术语表</h3>
+<div class="tbl"><table><colgroup><col style="width:50.0%"><col style="width:50.0%"></colgroup><thead><tr><th>术语</th><th>一句话解释</th></tr></thead><tbody><tr><td>归纳偏置</td><td>模型对数据做的先验假设，决定它学得快不快</td></tr><tr><td>过拟合 / 欠拟合</td><td>记住噪声 / 连规律都没学到</td></tr><tr><td>正则化</td><td>把先验写进目标函数，限制有效容量</td></tr><tr><td>梯度消失 / 爆炸</td><td>反向传播连乘导致信号指数衰减 / 放大</td></tr><tr><td>残差连接</td><td>给梯度开一条系数为 1 的直接路径</td></tr><tr><td>归一化（BN/LN）</td><td>把每层输入拉回稳定尺度</td></tr><tr><td>注意力</td><td>按相似度加权聚合其他位置的信息</td></tr><tr><td>位置编码</td><td>给注意力补上顺序信息（正弦 / RoPE）</td></tr><tr><td>分词器</td><td>把文本切成子词并映射为 ID</td></tr><tr><td>上下文窗口</td><td>模型一次能处理的最大 token 数</td></tr><tr><td>温度 / top-p</td><td>采样时的锐化与截断参数</td></tr><tr><td>嵌入</td><td>把离散对象映射为连续向量</td></tr><tr><td>向量库</td><td>支持近似最近邻检索的索引系统</td></tr><tr><td>RAG</td><td>先检索资料再让模型作答</td></tr><tr><td>微调</td><td>在预训练模型上用任务数据继续训练</td></tr><tr><td>LoRA</td><td>用低秩增量代替全量参数更新</td></tr><tr><td>RLHF</td><td>用人类偏好训练奖励模型再优化策略</td></tr><tr><td>DPO</td><td>直接从偏好对优化策略，省掉奖励模型</td></tr><tr><td>量化</td><td>用低比特表示权重与激活</td></tr><tr><td>KV cache</td><td>缓存历史键值，避免重复计算</td></tr><tr><td>蒸馏</td><td>用大模型指导小模型学习</td></tr><tr><td>幻觉</td><td>生成流畅但与事实不符的内容</td></tr><tr><td>对齐</td><td>让模型行为符合人类意图与价值观</td></tr><tr><td>提示注入</td><td>外部内容里藏指令，诱导模型越权</td></tr><tr><td>缩放定律</td><td>损失随参数、数据、算力增长的幂律关系</td></tr><tr><td>混合专家（MoE）</td><td>每次只激活部分子网络，扩大容量而不等比例增算力</td></tr><tr><td>思维链</td><td>让模型先写推理步骤再给答案</td></tr><tr><td>智能体</td><td>能规划、调用工具、多步执行的系统</td></tr><tr><td>评测污染</td><td>测试题目出现在训练数据里导致分数虚高</td></tr><tr><td>分布偏移</td><td>线上数据分布与训练时不同</td></tr></tbody></table></div>
+<h3 id="ch17-s5"><span class="sn">17.5</span>16.5 最后一句</h3>
+<p>学 AI 最有效的路径不是"读完所有资料再动手"，而是<strong>尽早做出一个能被别人使用的东西，然后被它的失败逼着往回补原理</strong>。</p>
+<p>卷一给了你往回补的深度，卷三给了往前跑的方法。这一卷的任务只有一件：让你知道什么时候该往哪边走。</p>
+  <div class="ch-end"><span>17 / 17</span><button data-act="top">回到顶部 ↑</button></div>
+</section>
+    </article>
+  </div>
+  <footer class="end">
+    <p class="series-note"><strong>AI 教程 · 卷二</strong>　方法论 · 经典模型 · 数据 · 视觉 · NLP · 大模型 · 生成 · 强化 · 部署 · 安全</p>
+    <p>三卷并置：卷一给推导，卷二给地图，卷三给工程。图中的数值与曲线由页面内的脚本即时计算，用来观察趋势，不作为实验数据引用。公式由 KaTeX 排版，首次打开需要网络加载一次字体资源。</p>
+  </footer>
+</main>
+</div>
+<button class="rail-toggle" data-act="rail">目录</button>
+<div class="hud">
+  <button data-act="font" title="切换字号">Aa</button>
+  <button data-act="theme" title="切换明暗">深色</button>
+  <button data-act="top" title="回到顶部">↑</button>
+</div>
+<script>window.__SEARCH__ = [{"id": "ch1", "h": "0　导读：这张地图怎么用", "k": "c", "s": "", "t": "三卷的分工是：卷一负责\"为什么\"，卷二负责\"有什么、选哪个\"，卷三负责\"怎么跑起来\"。这一卷的定位是技术选型与全局判断——你读完应该能回答：面对一个新问题，该先试什么、大概要多少数据、会遇到什么坑、上线后靠什么指标兜底。 0.1　一条贯穿全卷的主线 AI 的历史不是方法的堆积，而是一条清晰的主线：用越来越少的先验，换越来越大的数据和算力。 符号主义时代：人把规则写进去，机器只做推理； 统计学习时代：人设计特征，机器学权重； 深度学习时代：机器学特征，人设计结构； 大模型时代：机器学结构的一部分，人只设计训练目标与数据配比。 每往右走一步，人工先验减少，对数据和算力的依赖增加。这也解释了为什么\"AI 落地\"在不同行业难度差异巨大：数据充足、反馈快的领域（搜索、推荐、语音、视觉）先被吃掉；数据稀缺、错误代价高的领域（医疗诊断、工业控制）走得最慢。 0.2　十四站的路线  站   主题   你要解决的问题   ---   ---   ---   1   发展史   为什么现在是这个格局   2   方法论   任务、指标、验证怎么定   3   经典模型   不用深度学习的场合该用什么   4   数据工程   数据怎么准备才不白训   5   深度学习   训练一条流水线怎么搭   6   计算机视觉   检测、分割、生成怎么选   7   自然语言   从分词到大模型   8   大模型   能力边界与成本结构   9   生成与多模态   图像、视频、语音怎么统一   10   强化与智能体   会决策的系统怎么搭   11   工程落地   训练、推理、部署、监控   12   评估与安全   怎么知道它真的好、且不出事   13   路线与项目   个人怎么走到能独立交付  0.3　几个贯穿全卷的判断 这些结论在后面的章节会反复出现，先摆出来： **先有基线，再谈模型。** 任何任务的第一步都是一个能在一天内跑通的最简方案（逻辑回归、LightGBM、或一个预训练模型的零样本调用）。没有基线的\"提升\"无法证明。 **指标先于模型。** 指标定义错了，模型越好越糟。离线指标与线上目标不一致，是所有 AI 项目最常见的死法。 **数据决定上限，模型决定离上限多近。** 数据噪声、标签不一致、分布偏移，这些问题的模型侧努力基本无效。 **复杂度要和收益匹配。** 从 92% 到 93% 的准确率，可能要多付 20 倍推理成本。这笔账必须提前算。 **能被监控的才叫上线。** 没有输入分布监控、没有回滚机制、没有错误样本回流，系统迟早会静默失效。 0.4　约定 **\"经典模型\"** 指深度学习之前的方法：线性模型、树集成、SVM、KNN、朴素贝叶斯、聚类。 **\"大模型\"** 指参数规模在十亿以上、以自监督预训练为基础、可通过提示或微调适配多任务的模型。 **\""}, {"id": "ch1-s1", "h": "1.1 0.1　一条贯穿全卷的主线", "k": "s", "s": "0　导读：这张地图怎么用", "t": "0.1　一条贯穿全卷的主线 0.1　一条贯穿全卷的主线 AI 的历史不是方法的堆积，而是一条清晰的主线：用越来越少的先验，换越来越大的数据和算力。 符号主义时代：人把规则写进去，机器只做推理； 统计学习时代：人设计特征，机器学权重； 深度学习时代：机器学特征，人设计结构； 大模型时代：机器学结构的一部分，人只设计训练目标与数据配比。 每往右走一步，人工先验减少，对数据和算力的依赖增加。这也解释了为什么\"AI 落地\"在不同行业难度差异巨大：数据充足、反馈快的领域（搜索、推荐、语音、视觉）先被吃掉；数据稀缺、错误代价高的领域（医疗诊断、工业控制）走得最慢。"}, {"id": "ch1-s2", "h": "1.2 0.2　十四站的路线", "k": "s", "s": "0　导读：这张地图怎么用", "t": "0.2　十四站的路线 0.2　十四站的路线  站   主题   你要解决的问题   ---   ---   ---   1   发展史   为什么现在是这个格局   2   方法论   任务、指标、验证怎么定   3   经典模型   不用深度学习的场合该用什么   4   数据工程   数据怎么准备才不白训   5   深度学习   训练一条流水线怎么搭   6   计算机视觉   检测、分割、生成怎么选   7   自然语言   从分词到大模型   8   大模型   能力边界与成本结构   9   生成与多模态   图像、视频、语音怎么统一   10   强化与智能体   会决策的系统怎么搭   11   工程落地   训练、推理、部署、监控   12   评估与安全   怎么知道它真的好、且不出事   13   路线与项目   个人怎么走到能独立交付 "}, {"id": "ch1-s3", "h": "1.3 0.3　几个贯穿全卷的判断", "k": "s", "s": "0　导读：这张地图怎么用", "t": "0.3　几个贯穿全卷的判断 0.3　几个贯穿全卷的判断 这些结论在后面的章节会反复出现，先摆出来： **先有基线，再谈模型。** 任何任务的第一步都是一个能在一天内跑通的最简方案（逻辑回归、LightGBM、或一个预训练模型的零样本调用）。没有基线的\"提升\"无法证明。 **指标先于模型。** 指标定义错了，模型越好越糟。离线指标与线上目标不一致，是所有 AI 项目最常见的死法。 **数据决定上限，模型决定离上限多近。** 数据噪声、标签不一致、分布偏移，这些问题的模型侧努力基本无效。 **复杂度要和收益匹配。** 从 92% 到 93% 的准确率，可能要多付 20 倍推理成本。这笔账必须提前算。 **能被监控的才叫上线。** 没有输入分布监控、没有回滚机制、没有错误样本回流，系统迟早会静默失效。"}, {"id": "ch1-s4", "h": "1.4 0.4　约定", "k": "s", "s": "0　导读：这张地图怎么用", "t": "0.4　约定 0.4　约定 **\"经典模型\"** 指深度学习之前的方法：线性模型、树集成、SVM、KNN、朴素贝叶斯、聚类。 **\"大模型\"** 指参数规模在十亿以上、以自监督预训练为基础、可通过提示或微调适配多任务的模型。 **\"落地\"** 指能对外提供服务、有 SLA、有监控、有回滚的系统，不是 notebook 里跑通的实验。"}, {"id": "ch2", "h": "1　六十年：三次浪潮与两次寒冬", "k": "c", "s": "", "t": "了解历史不是为了背年份，而是为了看清一件事：这个领域每隔十几年就会重演一次\"能力被高估、然后被现实打回\"的循环。知道这个模式，你对当下任何\"颠覆性突破\"的判断都会更冷静。  时期   主线   代表成果   为什么会结束   ---   ---   ---   ---   1943–1956   神经元模型与图灵测试   McCulloch-Pitts 神经元、感知机   单层感知机无法解决异或，被证明能力有限   1956–1974   符号主义与搜索   通用问题求解器、LISP   组合爆炸、常识难以手工编码   1974–1980   第一次寒冬   经费收缩   承诺与现实差距过大   1980–1987   专家系统   医疗诊断、配置系统   规则维护成本爆炸，无法处理不确定性   1987–1993   第二次寒冬   —   专家系统泡沫破裂   1986–2011   统计学习   反向传播、SVM、随机森林、CRF   特征工程瓶颈、数据规模受限   2012–2017   深度学习   AlexNet、ResNet、seq2seq、GAN   需要大量标注，泛化到新任务成本高   2017–2022   预训练 + 微调   Transformer、BERT、GPT   每任务一模型，部署与维护成本高   2022–至今   大模型与多模态   指令微调、RLHF、扩散、Agent   推理成本、可靠性、幻觉仍未解决  1.1　三次浪潮共同的形状 每一轮都遵循同一个剧本： **一个新方法解决了旧方法的瓶颈**（感知机解决手工规则，深度学习解决特征工程，大模型解决任务定制）； **媒体与资本把\"能做什么\"外推成\"什么都能做\"**； **真实场景的边界条件（数据、成本、可靠性）暴露**； **进入低谷，但方法本身沉淀下来**。 低谷期并非浪费：SVM、集成学习、概率图模型都是在寒冬前后成熟的，它们至今是表格数据与可解释场景的主力。 1.2　两次真正的转折点 如果只能记两个节点，记这两个： **2012 年 AlexNet**：GPU + ReLU + Dropout + 大数据，把 ImageNet 错误率从 26% 拉到 15%。它证明的不是\"卷积好用\"（卷积早就好用），而是**\"算力 + 数据\"能突破手工特征的天花板**； **2017 年 Transformer**：把序列建模从串行改成并行，使\"堆更多层、喂更多数据\"在工程上可行。它之后的每一年，模型规模与数据规模都在按同一条曲线增长。 1.3　当前阶段的三个真实约束 历史告诉我们，判断一个技术能否落地，看三件事是否同时成立：  约束   现状   影响   ---   ---   ---   数据   文本、图像充裕；专业领域稀缺   通用能力易得，专业能力仍需标注   算力  "}, {"id": "ch2-s1", "h": "2.1 1.1　三次浪潮共同的形状", "k": "s", "s": "1　六十年：三次浪潮与两次寒冬", "t": "1.1　三次浪潮共同的形状 1.1　三次浪潮共同的形状 每一轮都遵循同一个剧本： **一个新方法解决了旧方法的瓶颈**（感知机解决手工规则，深度学习解决特征工程，大模型解决任务定制）； **媒体与资本把\"能做什么\"外推成\"什么都能做\"**； **真实场景的边界条件（数据、成本、可靠性）暴露**； **进入低谷，但方法本身沉淀下来**。 低谷期并非浪费：SVM、集成学习、概率图模型都是在寒冬前后成熟的，它们至今是表格数据与可解释场景的主力。"}, {"id": "ch2-s2", "h": "2.2 1.2　两次真正的转折点", "k": "s", "s": "1　六十年：三次浪潮与两次寒冬", "t": "1.2　两次真正的转折点 1.2　两次真正的转折点 如果只能记两个节点，记这两个： **2012 年 AlexNet**：GPU + ReLU + Dropout + 大数据，把 ImageNet 错误率从 26% 拉到 15%。它证明的不是\"卷积好用\"（卷积早就好用），而是**\"算力 + 数据\"能突破手工特征的天花板**； **2017 年 Transformer**：把序列建模从串行改成并行，使\"堆更多层、喂更多数据\"在工程上可行。它之后的每一年，模型规模与数据规模都在按同一条曲线增长。"}, {"id": "ch2-s3", "h": "2.3 1.3　当前阶段的三个真实约束", "k": "s", "s": "1　六十年：三次浪潮与两次寒冬", "t": "1.3　当前阶段的三个真实约束 1.3　当前阶段的三个真实约束 历史告诉我们，判断一个技术能否落地，看三件事是否同时成立：  约束   现状   影响   ---   ---   ---   数据   文本、图像充裕；专业领域稀缺   通用能力易得，专业能力仍需标注   算力   训练集中在大厂，推理可下沉   本地部署以量化为前提   可靠性   幻觉、分布外失效仍普遍   高风险场景必须人在回路  结论：通用能力已经\"过剩\"，稀缺的是可靠性与领域数据。 这也是为什么近几年的技术热点集中在 RAG、Agent、评测、对齐——它们都在补\"可靠性\"这一块。"}, {"id": "ch3", "h": "2　机器学习方法论：先把问题定对", "k": "c", "s": "", "t": "一个 AI 项目的成败，在写第一行代码之前就决定了大概七成。这一章讲的都是\"动手之前\"的事。 2.1　先分清任务类型  任务   有标签   典型问题   常用方法   ---   ---   ---   ---   监督·分类   是（离散）   欺诈、故障、意图识别   逻辑回归、树集成、神经网络   监督·回归   是（连续）   销量、价格、剩余寿命   线性、GBDT、神经网络   排序   是（相关性等级）   搜索、推荐   LambdaMART、双塔、交叉特征   无监督   否   分群、异常检测、降维   K-means、孤立森林、PCA   自监督   无（自己造）   表示学习、预训练   掩码、对比学习   强化学习   奖励   控制、调度、游戏   PPO、DQN、策略搜索  最容易搞错的是\"分类 vs 排序\"。推荐系统里\"用户会不会点\"是分类，但产品要的是\"给这个用户排哪十个\"，两者目标函数不同。把排序当分类训，模型会倾向于推\"人人都点\"的热门内容，个性化反而变差。 2.2　指标：选错了会把人带偏 二分类的混淆矩阵给出四个数：TP、FP、FN、TN。由此派生： 解释一遍： **精确率**：报出来的有多少是真的（错了会怎样）； **召回率**：真的里面抓到了多少（漏了会怎样）； **$F_1$**：两者的调和平均，偏向较小的一方。 还有两个\"阈值无关\"的指标： **ROC-AUC**：随机取一个正样本和一个负样本，正样本得分高于负样本的概率。它在**类别平衡**时很好用； **PR-AUC**：在**类别极不平衡**（比如欺诈只占 0.1%）时更可靠，因为 ROC 的假阳性率分母是 $FP+TN$，负样本极多时 ROC 会显得很好看，而实际精确率很低。 2.3　数据划分：验证集是怎么被污染的 标准做法是训练集 / 验证集 / 测试集，比例常见 6:2:2 或 8:1:1。三条铁律： **测试集只能用一次**。反复看测试集调参，等于把它变成了验证集，最终指标会虚高； **时间序列必须按时间切**。用未来预测过去，或者随机打乱时间顺序，会造成信息泄漏——模型在训练时\"见过未来\"； **分组不能跨集合**。同一个用户、同一张图的不同裁剪、同一病人的多次检查，必须整体落在同一个集合里，否则验证分数没有意义。 交叉验证（k-fold）用于数据量小的情况：把数据分 k 份，轮流用一份做验证。它给出的是\"性能的方差估计\"，而不只是一个数——方差大说明模型对数据划分敏感，这本身就是信息。 2.4　偏差与方差：一条曲线解释一切 把期望泛化误差分解： 高偏差：训练误差和验证误差都高，模型欠拟合； 高方差：训练误差低、验证误差高，模型记住了噪声； $\\sigma^2$ 是数据本身的不可约误差，换模型也消不掉。 这个分解的价值在于它把\"调参\"变成了诊断"}, {"id": "ch3-s1", "h": "3.1 2.1　先分清任务类型", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.1　先分清任务类型 2.1　先分清任务类型  任务   有标签   典型问题   常用方法   ---   ---   ---   ---   监督·分类   是（离散）   欺诈、故障、意图识别   逻辑回归、树集成、神经网络   监督·回归   是（连续）   销量、价格、剩余寿命   线性、GBDT、神经网络   排序   是（相关性等级）   搜索、推荐   LambdaMART、双塔、交叉特征   无监督   否   分群、异常检测、降维   K-means、孤立森林、PCA   自监督   无（自己造）   表示学习、预训练   掩码、对比学习   强化学习   奖励   控制、调度、游戏   PPO、DQN、策略搜索  最容易搞错的是\"分类 vs 排序\"。推荐系统里\"用户会不会点\"是分类，但产品要的是\"给这个用户排哪十个\"，两者目标函数不同。把排序当分类训，模型会倾向于推\"人人都点\"的热门内容，个性化反而变差。"}, {"id": "ch3-s2", "h": "3.2 2.2　指标：选错了会把人带偏", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.2　指标：选错了会把人带偏 2.2　指标：选错了会把人带偏 二分类的混淆矩阵给出四个数：TP、FP、FN、TN。由此派生： 解释一遍： **精确率**：报出来的有多少是真的（错了会怎样）； **召回率**：真的里面抓到了多少（漏了会怎样）； **$F_1$**：两者的调和平均，偏向较小的一方。 还有两个\"阈值无关\"的指标： **ROC-AUC**：随机取一个正样本和一个负样本，正样本得分高于负样本的概率。它在**类别平衡**时很好用； **PR-AUC**：在**类别极不平衡**（比如欺诈只占 0.1%）时更可靠，因为 ROC 的假阳性率分母是 $FP+TN$，负样本极多时 ROC 会显得很好看，而实际精确率很低。"}, {"id": "ch3-s3", "h": "3.3 2.3　数据划分：验证集是怎么被污染的", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.3　数据划分：验证集是怎么被污染的 2.3　数据划分：验证集是怎么被污染的 标准做法是训练集 / 验证集 / 测试集，比例常见 6:2:2 或 8:1:1。三条铁律： **测试集只能用一次**。反复看测试集调参，等于把它变成了验证集，最终指标会虚高； **时间序列必须按时间切**。用未来预测过去，或者随机打乱时间顺序，会造成信息泄漏——模型在训练时\"见过未来\"； **分组不能跨集合**。同一个用户、同一张图的不同裁剪、同一病人的多次检查，必须整体落在同一个集合里，否则验证分数没有意义。 交叉验证（k-fold）用于数据量小的情况：把数据分 k 份，轮流用一份做验证。它给出的是\"性能的方差估计\"，而不只是一个数——方差大说明模型对数据划分敏感，这本身就是信息。"}, {"id": "ch3-s4", "h": "3.4 2.4　偏差与方差：一条曲线解释一切", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.4　偏差与方差：一条曲线解释一切 2.4　偏差与方差：一条曲线解释一切 把期望泛化误差分解： 高偏差：训练误差和验证误差都高，模型欠拟合； 高方差：训练误差低、验证误差高，模型记住了噪声； $\\sigma^2$ 是数据本身的不可约误差，换模型也消不掉。 这个分解的价值在于它把\"调参\"变成了诊断：先看训练/验证误差的差距，判断你在曲线的哪一侧，再决定是加容量还是加正则。上面的实验台可以直接看到这条曲线：次数从 1 增到 9，训练误差一路降，泛化能力先降后升。"}, {"id": "ch3-s5", "h": "3.5 2.5　类别不平衡的四种处理", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.5　类别不平衡的四种处理 2.5　类别不平衡的四种处理  手段   做法   代价   ---   ---   ---   重采样   过采样少数类 / 欠采样多数类   过采样易过拟合，欠采样丢信息   加权损失   少数类损失乘大权重   权重过大会导致校准变差   阈值调整   不改训练，只调判定阈值   最简单，最常被忽略   合成样本   SMOTE 在少数类近邻间插值   高维或类别边界复杂时效果差  优先级建议：先调阈值，再考虑加权，最后才重采样。 阈值调整不改变模型，只改工作点，代价最低。"}, {"id": "ch3-s6", "h": "3.6 2.6　把问题定清楚的五个问题", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "2.6　把问题定清楚的五个问题 2.6　把问题定清楚的五个问题 动手前，逐个回答： **预测目标是什么？** 一个具体的、可观测的量（\"7 天内是否流失\"），而不是抽象概念（\"用户满意度\"）。 **标签怎么来？** 人工标注、日志回填、还是业务结果？延迟多久？有没有系统性偏差？ **错误的代价对称吗？** 漏检一个欺诈 vs 误封一个正常用户，代价可能差百倍，这决定了指标与阈值。 **上线后靠什么监控？** 输入分布、输出分布、业务指标，三者至少要监控两个。 **最简基线是什么？** 规则、历史均值、热门推荐、零样本调用大模型——先有一个能对比的数。"}, {"id": "ch3-s7", "h": "3.7 特征工程的实操清单", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "特征工程的实操清单 特征工程的实操清单 拿到一张表，按这个顺序过一遍，通常能拿到大部分收益：  步骤   动作   判断依据   ---   ---   ---   1 看分布   每列的缺失率、取值数、偏度   缺失 > 30% 的列要么删要么单独建模   2 处理时间   拆出年/月/日/星期/是否节假日   有周期性的业务几乎必做   3 处理类别   频次编码 + 目标编码（带折外防泄漏）   高基数类别不要直接 one-hot   4 造交叉   两两相乘、比值、差值   业务上有关联的才做   5 聚合特征   按用户/商品的统计量（均值、计数、最近一次）   注意只能用当前时刻之前的数据   6 筛选   重要性排序，去掉冗余   相关性 > 0.95 的成对特征留一个  目标编码是最容易泄漏的一步：用全量数据算类别均值，等于把标签信息带进了特征。正确做法是 K 折外编码——每一折用其余折的数据算均值。"}, {"id": "ch3-s8", "h": "3.8 交叉验证：什么时候不能用随机划分", "k": "s", "s": "2　机器学习方法论：先把问题定对", "t": "交叉验证：什么时候不能用随机划分 交叉验证：什么时候不能用随机划分  数据结构   划分方式   原因   ---   ---   ---   独立同分布样本   随机 K 折   常规   同一用户多条记录   按用户分组   否则同人数据同时出现在训练与验证   时间序列   按时间切   否则用到未来信息   同一文档多段   按文档分组   否则模型记住了文档而不是规律  判断方法很朴素：问一句\"这条验证样本的信息，训练时能不能看到\"。能看到，就必须换划分方式。"}, {"id": "ch4", "h": "3　经典模型：能不用深度就不用", "k": "c", "s": "", "t": "这一章不推导（推导在卷一第 6–9 章），只给选型判断。理由很简单：经典模型训练快、可解释、部署轻、对数据量要求低，在很多真实业务里它已经够用，而深度模型带来的额外复杂度需要实打实的收益来换。 3.1　选型速查  场景   首选   备选   关键理由   ---   ---   ---   ---   需要解释每个预测   逻辑回归 + 特征工程   浅层树 + SHAP   系数可直接解释   表格数据、追求精度   LightGBM / XGBoost   CatBoost   抗尺度、抗缺失、自动交互   样本极少（<1000）   逻辑回归 / 朴素贝叶斯   核 SVM   参数少，不容易过拟合   高维稀疏（文本 TF-IDF）   线性 SVM / 逻辑回归   朴素贝叶斯   高效、稳定   需要概率校准   逻辑回归 / 校准后的树   Platt scaling   树输出的概率不平滑   在线学习、流式更新   SGDClassifier / 被动攻击   —   支持增量   异常检测、无标签   孤立森林 / LOF   自编码器重构误差   无需标签   时序预测、强季节性   季节性 ARIMA / Prophet   LightGBM + 时间特征   树不能外推趋势   中小规模图像   预训练 CNN 微调   HOG+SVM   迁移学习远胜手工特征  3.2　线性模型的价值：可解释与可校准 逻辑回归的系数 \\beta_j 表示\"特征 x_j 增加一单位，对数几率增加 \\beta_j\"。这是业务方唯一能直接读懂的形式，也是风控、医疗、金融等受监管行业仍大量使用它的原因。 两点工程经验： **先做特征标准化**，否则系数大小不可比（正则化也会失真）； **注意多重共线性**：两个高度相关的特征会让系数符号翻转，解释失真。用 VIF 检查，或改用岭回归。 3.3　树集成：表格数据的事实标准 LightGBM 在中等数据上通常是最强基线，配置建议： import lightgbm as lgb\n\nparams = dict(\n    objective='binary',\n    learning_rate=0.05,        # 先小一点，配合更多轮\n    num_leaves=31,             # 控制复杂度，别超过 2^depth\n    min_data_in_leaf=20,       # 防过拟合的关键参数\n    feature_fraction=0.8,      # 列采样，降相关性\n    bagging_fraction=0.8,\n    bagging_freq=1,\n    lambda_l2=1.0,             # 叶权重正则\n    metric='auc'"}, {"id": "ch4-s1", "h": "4.1 3.1　选型速查", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.1　选型速查 3.1　选型速查  场景   首选   备选   关键理由   ---   ---   ---   ---   需要解释每个预测   逻辑回归 + 特征工程   浅层树 + SHAP   系数可直接解释   表格数据、追求精度   LightGBM / XGBoost   CatBoost   抗尺度、抗缺失、自动交互   样本极少（<1000）   逻辑回归 / 朴素贝叶斯   核 SVM   参数少，不容易过拟合   高维稀疏（文本 TF-IDF）   线性 SVM / 逻辑回归   朴素贝叶斯   高效、稳定   需要概率校准   逻辑回归 / 校准后的树   Platt scaling   树输出的概率不平滑   在线学习、流式更新   SGDClassifier / 被动攻击   —   支持增量   异常检测、无标签   孤立森林 / LOF   自编码器重构误差   无需标签   时序预测、强季节性   季节性 ARIMA / Prophet   LightGBM + 时间特征   树不能外推趋势   中小规模图像   预训练 CNN 微调   HOG+SVM   迁移学习远胜手工特征 "}, {"id": "ch4-s2", "h": "4.2 3.2　线性模型的价值：可解释与可校准", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.2　线性模型的价值：可解释与可校准 3.2　线性模型的价值：可解释与可校准 逻辑回归的系数 \\beta_j 表示\"特征 x_j 增加一单位，对数几率增加 \\beta_j\"。这是业务方唯一能直接读懂的形式，也是风控、医疗、金融等受监管行业仍大量使用它的原因。 两点工程经验： **先做特征标准化**，否则系数大小不可比（正则化也会失真）； **注意多重共线性**：两个高度相关的特征会让系数符号翻转，解释失真。用 VIF 检查，或改用岭回归。"}, {"id": "ch4-s3", "h": "4.3 3.3　树集成：表格数据的事实标准", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.3　树集成：表格数据的事实标准 3.3　树集成：表格数据的事实标准 LightGBM 在中等数据上通常是最强基线，配置建议： import lightgbm as lgb\n\nparams = dict(\n    objective='binary',\n    learning_rate=0.05,        # 先小一点，配合更多轮\n    num_leaves=31,             # 控制复杂度，别超过 2^depth\n    min_data_in_leaf=20,       # 防过拟合的关键参数\n    feature_fraction=0.8,      # 列采样，降相关性\n    bagging_fraction=0.8,\n    bagging_freq=1,\n    lambda_l2=1.0,             # 叶权重正则\n    metric='auc',\n)\n# 早停：验证集连续 50 轮不提升就停\nmodel = lgb.train(params, dtrain, num_boost_round=2000,\n                  valid_sets=[dvalid], callbacks=[lgb.early_stopping(50)]) 调参优先级（按收益排序）：learning_rate + num_boost_round 一起调 → num_leaves / min_data_in_leaf → 采样比例 → 正则项。 不要做的事：把连续特征做标准化（树不在乎）、对缺失值做插补（LightGBM 原生处理更好）、做大量多项式特征（树自己会组合）。"}, {"id": "ch4-s4", "h": "4.4 3.4　核 SVM：小样本高维的可靠选择", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.4　核 SVM：小样本高维的可靠选择 3.4　核 SVM：小样本高维的可靠选择 适用条件很明确：样本量几千以内、特征维度高、边界非线性但类别可分。文本分类（TF-IDF 特征）是它的经典战场。 三个必调项：C（正则强度）、核类型、RBF 的 \\gamma。经验起点：C 从 1 开始按 10 倍网格搜索，\\gamma 取 1/d（d 是特征数）附近。 不适用的场合：样本超过 5 万（训练 O(N^3)）、需要输出概率（要用 Platt 校准，成本不低）、需要在线更新。"}, {"id": "ch4-s5", "h": "4.5 3.5　KNN 与朴素贝叶斯：简单但边界清晰", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.5　KNN 与朴素贝叶斯：简单但边界清晰 3.5　KNN 与朴素贝叶斯：简单但边界清晰 KNN 没有训练阶段，预测时算距离。它的隐含假设是\"近处样本同类\"。高维时距离会失效（维度灾难：所有点对的距离趋于相同），必须先降维或选特征。适合作为\"必须极简\"场景的兜底。 朴素贝叶斯 假设特征在给定类别下条件独立。这个假设几乎总是错的，但它在文本分类上仍然有效——因为分类只需要\"哪个后验最大\"，不需要概率精确。它的优点是训练是闭式解、极快、可增量。"}, {"id": "ch4-s6", "h": "4.6 3.6　可解释性：三种工具", "k": "s", "s": "3　经典模型：能不用深度就不用", "t": "3.6　可解释性：三种工具 3.6　可解释性：三种工具  工具   说明   适用   ---   ---   ---   特征重要性（分裂增益）   树模型自带，反映\"用了多少\"   快速筛查，但有偏（偏好高基数特征）   Permutation importance   打乱某特征看指标掉多少   更可靠，计算成本高   SHAP   基于博弈论的边际贡献分配   单样本解释，可加性严格  SHAP 值得多用：它给出\"这个样本为什么被判为高风险\"的逐特征归因，业务方能接受，也便于发现数据 bug（比如某个 ID 类特征贡献异常高，往往是泄漏）。"}, {"id": "ch5", "h": "4　数据工程：模型的上限在这里", "k": "c", "s": "", "t": "有一句被反复引用的话：数据和特征决定了上限，模型只是逼近这个上限。这一章讲三件最容易做错的事。 4.1　数据泄漏：最常见的\"高分离奇好\" 泄漏指训练时用到了预测时拿不到的信息。它的表现是离线指标异常好，上线立刻崩。四种典型形态：  类型   例子   怎么发现   ---   ---   ---   时间泄漏   用未来的统计量做特征（如全量均值）   特征与标签的相关性高得反常   目标泄漏   特征里混入了标签的派生量（如\"结案时间\"）   单特征 AUC 异常高   分组泄漏   同一实体跨训练/验证集   按实体分组重切后指标大跌   重复样本   同一记录重复出现在两个集合   去重后指标变化  排查方法很朴素，但有效：逐个特征算单特征 AUC，凡是超过 0.9 的都去看一眼它的定义。真正有强预测力的特征很少，异常高的往往是泄漏。 4.2　标签质量：噪声从哪来 标签不是真理，是观测。三类常见问题： **标注不一致**：同一批数据两个人标出不同结果。先算标注者间的一致率（Cohen's $\\kappa$），低于 0.6 说明定义本身模糊，要先修定义； **代理标签偏差**：用\"点击\"当\"喜欢\"，用\"复购\"当\"满意\"。代理与目标的相关性决定了模型上限； **延迟标签**：欺诈要 30 天后才确认，模型只能用 30 天前的数据训练。这会引入\"标签未成熟\"问题，需要设置观察窗口。 处理噪声的实用手段：对称损失（对噪声鲁棒）、置信学习（用模型找出高概率错标的样本再人工复核）、多标注者投票。但优先级最高的是修流程，而不是修算法。 4.3　分布偏移：上线之后才暴露的问题 训练分布 p_{\\text{train}}(x,y) 与线上 p_{\\text{live}}(x,y) 不一致，模型就会退化。三种类型：  类型   变化   例子   ---   ---   ---   协变量偏移   只有 p(x) 变   用户结构变化、季节变化   概念偏移   p(y\\mid x) 变   欺诈手法升级、用户偏好变   标签偏移   p(y) 变   大促期间购买率暴涨  监控上分别对应：输入特征的分布监控（PSI、KS）、预测分布的监控、业务指标的监控。三者缺一不可，因为协变量偏移可以先于指标暴露出来。 4.4　特征工程的现代做法 深度模型能自动学特征，但\"喂什么进去\"仍然关键。三类手工特征仍有价值： **统计聚合**：用户近 7/30/90 天行为计数、金额均值——树的模型尤其吃这类特征； **交叉特征**：类别 × 类别的组合（如\"城市 × 时段\"），在推荐里效果显著； **时间特征**：星期、是否节假日、距上次行为的间隔。注意**周期编码**（sin/cos）比整数编码更合理，避免\"周日 0 与周一 6 距离很远\"的假象。 4.5　数据量：够不够的判断 粗略的经"}, {"id": "ch5-s1", "h": "5.1 4.1　数据泄漏：最常见的\"高分离奇好\"", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "4.1　数据泄漏：最常见的\"高分离奇好\" 4.1　数据泄漏：最常见的\"高分离奇好\" 泄漏指训练时用到了预测时拿不到的信息。它的表现是离线指标异常好，上线立刻崩。四种典型形态：  类型   例子   怎么发现   ---   ---   ---   时间泄漏   用未来的统计量做特征（如全量均值）   特征与标签的相关性高得反常   目标泄漏   特征里混入了标签的派生量（如\"结案时间\"）   单特征 AUC 异常高   分组泄漏   同一实体跨训练/验证集   按实体分组重切后指标大跌   重复样本   同一记录重复出现在两个集合   去重后指标变化  排查方法很朴素，但有效：逐个特征算单特征 AUC，凡是超过 0.9 的都去看一眼它的定义。真正有强预测力的特征很少，异常高的往往是泄漏。"}, {"id": "ch5-s2", "h": "5.2 4.2　标签质量：噪声从哪来", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "4.2　标签质量：噪声从哪来 4.2　标签质量：噪声从哪来 标签不是真理，是观测。三类常见问题： **标注不一致**：同一批数据两个人标出不同结果。先算标注者间的一致率（Cohen's $\\kappa$），低于 0.6 说明定义本身模糊，要先修定义； **代理标签偏差**：用\"点击\"当\"喜欢\"，用\"复购\"当\"满意\"。代理与目标的相关性决定了模型上限； **延迟标签**：欺诈要 30 天后才确认，模型只能用 30 天前的数据训练。这会引入\"标签未成熟\"问题，需要设置观察窗口。 处理噪声的实用手段：对称损失（对噪声鲁棒）、置信学习（用模型找出高概率错标的样本再人工复核）、多标注者投票。但优先级最高的是修流程，而不是修算法。"}, {"id": "ch5-s3", "h": "5.3 4.3　分布偏移：上线之后才暴露的问题", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "4.3　分布偏移：上线之后才暴露的问题 4.3　分布偏移：上线之后才暴露的问题 训练分布 p_{\\text{train}}(x,y) 与线上 p_{\\text{live}}(x,y) 不一致，模型就会退化。三种类型：  类型   变化   例子   ---   ---   ---   协变量偏移   只有 p(x) 变   用户结构变化、季节变化   概念偏移   p(y\\mid x) 变   欺诈手法升级、用户偏好变   标签偏移   p(y) 变   大促期间购买率暴涨  监控上分别对应：输入特征的分布监控（PSI、KS）、预测分布的监控、业务指标的监控。三者缺一不可，因为协变量偏移可以先于指标暴露出来。"}, {"id": "ch5-s4", "h": "5.4 4.4　特征工程的现代做法", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "4.4　特征工程的现代做法 4.4　特征工程的现代做法 深度模型能自动学特征，但\"喂什么进去\"仍然关键。三类手工特征仍有价值： **统计聚合**：用户近 7/30/90 天行为计数、金额均值——树的模型尤其吃这类特征； **交叉特征**：类别 × 类别的组合（如\"城市 × 时段\"），在推荐里效果显著； **时间特征**：星期、是否节假日、距上次行为的间隔。注意**周期编码**（sin/cos）比整数编码更合理，避免\"周日 0 与周一 6 距离很远\"的假象。"}, {"id": "ch5-s5", "h": "5.5 4.5　数据量：够不够的判断", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "4.5　数据量：够不够的判断 4.5　数据量：够不够的判断 粗略的经验（会有偏差，但能给你量级感觉）：  任务   从零训练   微调预训练模型   ---   ---   ---   图像分类（10 类）   每类数千   每类数十   文本分类   数万条   数百到数千   目标检测   每类数千张   数百张   语音识别   数百小时   数十小时  先问\"能不能用预训练模型\"，再问\"要多少数据\"——这一步经常能把需求降一到两个数量级。"}, {"id": "ch5-s6", "h": "5.6 标注质量管理：四个必须做的动作", "k": "s", "s": "4　数据工程：模型的上限在这里", "t": "标注质量管理：四个必须做的动作 标注质量管理：四个必须做的动作 标注是 AI 项目里最贵也最容易被低估的一环。四条基本纪律： **先写规范，再招人**。规范里要有正面例子与边界例子，不能只有定义； **双标注 + 一致性检验**。抽 10% 做重复标注，算 Cohen's kappa；低于 0.6 说明规范本身有问题，不是标注员的问题； **黄金集**。混入 20 条已确定答案的样本，定期检查标注员是否漂移； **回流机制**。线上发现的错例，定期加入训练集，形成闭环。  指标   含义   健康值   ---   ---   ---   标注一致性 kappa   两人标注的吻合程度   > 0.7   黄金集通过率   标注员对已知答案的准确率   > 95%   单条耗时   标注效率   与预算匹配  一个反直觉的结论：标注质量的上限由规范决定，不由标注员决定。规范模糊时，加人只会增加噪声。"}, {"id": "ch6", "h": "5　深度学习：一条能重复的训练流水线", "k": "c", "s": "", "t": "原理部分（初始化、归一化、残差）在卷一第 10 章讲过。这一章讲操作层：怎么组织代码、按什么顺序调参、出了问题怎么定位。 5.1 训练循环的心智模型 任何训练脚本都是这五步的循环： for step, batch in enumerate(loader):\n    x, y = batch                       # 1. 取数据（含增强、设备拷贝）\n    logits = model(x)                  # 2. 前向\n    loss = criterion(logits, y)        # 3. 损失\n    loss.backward()                    # 4. 反向（建图 -> 回传）\n    optimizer.step()                   # 5. 更新\n    optimizer.zero_grad(set_to_none=True)  # 清梯度，放最后更省内存 把这五步写成可开关的开关，是让调试变快的关键：能在 100 个样本上跑完整个循环、能关掉增强、能只跑前向。很多\"训不动\"的问题，靠缩小规模能在十分钟内定位。 5.2 超参的调整顺序 按影响大小排（而不是按论文里写得多的排）： **学习率**：影响最大。先用 lr range test 扫一遍，选损失下降最快的区间的下限； **batch 大小与调度**：batch 大则 lr 要相应放大（线性缩放规则），并配 warmup； **模型规模**：宽/深按数据量选，宁可先小后大； **正则强度**：weight decay、dropout、label smoothing，先只调 weight decay； **其余**：优化器细节（$\\beta_1,\\beta_2,\\epsilon$）、增强强度。 一个常被忽略的事实：小模型 + 好数据 > 大模型 + 一般数据。在数据有限时，先把数据质量提上去，收益通常超过换模型。 5.3 迁移学习：三种微调策略  策略   做法   适用   ---   ---   ---   冻结主干   只训最后的分类头   数据极少（数百）、任务与预训练接近   分层学习率   主干 lr 小、头部 lr 大   中等数据、任务有差异   全量微调   所有参数更新   数据充足、任务差异大  视觉任务的经验起点：冻结主干训 5 轮头部，再解冻全部用 1/10 的学习率微调。文本任务用 BERT 类模型时，学习率 2e-5 到 5e-5 是常见区间，太大容易破坏预训练知识。 5.4 显存：先算清楚再看 OOM 报错 训练显存大致由四部分组成： 以 FP16 + Adam 训练 7B 模型为例：权重 14GB、梯度 14GB、Adam 的 m 与 v 各 28GB（FP"}, {"id": "ch6-s1", "h": "6.1 5.1 训练循环的心智模型", "k": "s", "s": "5　深度学习：一条能重复的训练流水线", "t": "5.1 训练循环的心智模型 5.1 训练循环的心智模型 任何训练脚本都是这五步的循环： for step, batch in enumerate(loader):\n    x, y = batch                       # 1. 取数据（含增强、设备拷贝）\n    logits = model(x)                  # 2. 前向\n    loss = criterion(logits, y)        # 3. 损失\n    loss.backward()                    # 4. 反向（建图 -> 回传）\n    optimizer.step()                   # 5. 更新\n    optimizer.zero_grad(set_to_none=True)  # 清梯度，放最后更省内存 把这五步写成可开关的开关，是让调试变快的关键：能在 100 个样本上跑完整个循环、能关掉增强、能只跑前向。很多\"训不动\"的问题，靠缩小规模能在十分钟内定位。"}, {"id": "ch6-s2", "h": "6.2 5.2 超参的调整顺序", "k": "s", "s": "5　深度学习：一条能重复的训练流水线", "t": "5.2 超参的调整顺序 5.2 超参的调整顺序 按影响大小排（而不是按论文里写得多的排）： **学习率**：影响最大。先用 lr range test 扫一遍，选损失下降最快的区间的下限； **batch 大小与调度**：batch 大则 lr 要相应放大（线性缩放规则），并配 warmup； **模型规模**：宽/深按数据量选，宁可先小后大； **正则强度**：weight decay、dropout、label smoothing，先只调 weight decay； **其余**：优化器细节（$\\beta_1,\\beta_2,\\epsilon$）、增强强度。 一个常被忽略的事实：小模型 + 好数据 > 大模型 + 一般数据。在数据有限时，先把数据质量提上去，收益通常超过换模型。"}, {"id": "ch6-s3", "h": "6.3 5.3 迁移学习：三种微调策略", "k": "s", "s": "5　深度学习：一条能重复的训练流水线", "t": "5.3 迁移学习：三种微调策略 5.3 迁移学习：三种微调策略  策略   做法   适用   ---   ---   ---   冻结主干   只训最后的分类头   数据极少（数百）、任务与预训练接近   分层学习率   主干 lr 小、头部 lr 大   中等数据、任务有差异   全量微调   所有参数更新   数据充足、任务差异大  视觉任务的经验起点：冻结主干训 5 轮头部，再解冻全部用 1/10 的学习率微调。文本任务用 BERT 类模型时，学习率 2e-5 到 5e-5 是常见区间，太大容易破坏预训练知识。"}, {"id": "ch6-s4", "h": "6.4 5.4 显存：先算清楚再看 OOM 报错", "k": "s", "s": "5　深度学习：一条能重复的训练流水线", "t": "5.4 显存：先算清楚再看 OOM 报错 5.4 显存：先算清楚再看 OOM 报错 训练显存大致由四部分组成： 以 FP16 + Adam 训练 7B 模型为例：权重 14GB、梯度 14GB、Adam 的 m 与 v 各 28GB（FP32）、激活另算——光静态部分就超过 80GB。这解释了为什么需要 ZeRO/FSDP 做参数分片（卷三展开）。 常见省显存手段的优先级：小 batch + 梯度累积 → 混合精度 → 梯度检查点 → 参数分片。"}, {"id": "ch6-s5", "h": "6.5 5.5 九种失败模式对症表", "k": "s", "s": "5　深度学习：一条能重复的训练流水线", "t": "5.5 九种失败模式对症表 5.5 九种失败模式对症表  现象   最可能的原因   先试什么   ---   ---   ---   损失不降   lr 太小 / 数据或标签错   放大 lr 10 倍；过拟合 10 个样本   损失变 NaN   lr 太大 / 混合精度溢出   降 lr；检查 loss scale   训练降验证升   过拟合   加正则、加数据、减容量   训练验证都不动   欠拟合或梯度消失   加容量、换激活、查梯度范数   指标卡在某个值   类别不平衡 / 指标错   看混淆矩阵，换指标   结果每次都不一样且差很多   初始化或数据顺序问题   固定种子，检查 shuffle   验证远好于训练   数据泄漏   查单特征 AUC、查重复样本   推理与训练结果不一致   BN 的 train/eval 模式   确认 model.eval()   显存缓慢增长   计算图未释放 / 缓存累积   检查 detach()、清缓存  上面这个实验台可以当作\"学习率直觉\"的训练：把 η 推到 0.6 附近，你会看到轨迹直接飞出去——这就是发散；调到 0.05，收敛慢得看不出变化。真实训练里的表现一模一样，只是维度更高、看不见而已。"}, {"id": "ch7", "h": "6　计算机视觉：四个任务，四种评价", "k": "c", "s": "", "t": "你有数字图像处理的底子，这一章的重点不是\"卷积是什么\"，而是任务怎么定义、指标怎么算、方案怎么选。 6.1 分类：从单标签到多标签 分类的输出是一个概率向量。三个现代要点： **数据增强是主要收益来源**：RandAugment、MixUp、CutMix 这类方法在中小数据集上能提升几个点，比换模型划算； **标签平滑**抑制过度自信，改善校准； **长尾问题**：真实数据类别极不均衡，用重采样、logit adjustment 或两阶段训练（先均衡预训练，再长尾微调）。 指标：Top-1 / Top-5 准确率。注意类别不均衡时用宏平均（macro-F1），不要用微平均，后者会被大类主导。 6.2 检测：框的匹配与 NMS 检测输出\"每个目标的框 + 类别\"。核心机制有三个： **锚框 / 无锚**：Faster R-CNN 用锚框，YOLO 后期版本用中心点 + 尺寸回归，省掉锚框调参； **IoU 与匹配**：预测框与真值框的交并比决定\"算不算命中\"。IoU 阈值 0.5 常用于\"是否检出\"，0.75 用于\"框得准不准\"； **NMS**：同一目标会有多个重叠框，按分数排序后抑制 IoU 超过阈值的。 指标是 mAP（各类 AP 的均值），分 mAP@0.5 和 mAP@0.5:0.95（后者对框的精度要求更高）。报告 mAP 时必须写清阈值，否则数字不可比。 6.3 分割：像素级的三类任务  类型   输出   代表方法   指标   ---   ---   ---   ---   语义分割   每像素类别   U-Net、DeepLab   mIoU   实例分割   每实例的掩码   Mask R-CNN   mask mAP   全景分割   两者合并   Panoptic FPN   PQ  mIoU 的定义是\"交并比在所有类别上取平均\"，它惩罚\"漏标\"和\"多标\"同样重。医学图像里更常用 Dice 系数，因为它对类别极不平衡更友好。 现代趋势是提示式分割（SAM 一类）：给定点、框或文本提示，输出掩码。它把分割从\"每类训一个模型\"变成\"一个模型适配多任务\"，这大幅降低了标注需求。 6.4 从图像处理到深度视觉：哪些东西没变 你在图像处理课上学的东西依然有效，只是角色变了：  传统技术   在深度视觉里的位置   ---   ---   高斯滤波 / 双边滤波   预处理去噪；也可作为固定卷积核嵌入网络   边缘检测（Sobel/Canny）   浅层卷积学到的正是这类核；Canny 仍用于后处理与标注辅助   形态学操作   掩码后处理（去除小连通域、填补空洞）   直方图均衡 / Gamma   数据增强与预处理；但要注意它会改变分布   多尺度金字塔   FPN、图像金字塔推理，思想完全相同   光流   视频理解的基础；传统 Lucas"}, {"id": "ch7-s1", "h": "7.1 6.1 分类：从单标签到多标签", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "6.1 分类：从单标签到多标签 6.1 分类：从单标签到多标签 分类的输出是一个概率向量。三个现代要点： **数据增强是主要收益来源**：RandAugment、MixUp、CutMix 这类方法在中小数据集上能提升几个点，比换模型划算； **标签平滑**抑制过度自信，改善校准； **长尾问题**：真实数据类别极不均衡，用重采样、logit adjustment 或两阶段训练（先均衡预训练，再长尾微调）。 指标：Top-1 / Top-5 准确率。注意类别不均衡时用宏平均（macro-F1），不要用微平均，后者会被大类主导。"}, {"id": "ch7-s2", "h": "7.2 6.2 检测：框的匹配与 NMS", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "6.2 检测：框的匹配与 NMS 6.2 检测：框的匹配与 NMS 检测输出\"每个目标的框 + 类别\"。核心机制有三个： **锚框 / 无锚**：Faster R-CNN 用锚框，YOLO 后期版本用中心点 + 尺寸回归，省掉锚框调参； **IoU 与匹配**：预测框与真值框的交并比决定\"算不算命中\"。IoU 阈值 0.5 常用于\"是否检出\"，0.75 用于\"框得准不准\"； **NMS**：同一目标会有多个重叠框，按分数排序后抑制 IoU 超过阈值的。 指标是 mAP（各类 AP 的均值），分 mAP@0.5 和 mAP@0.5:0.95（后者对框的精度要求更高）。报告 mAP 时必须写清阈值，否则数字不可比。"}, {"id": "ch7-s3", "h": "7.3 6.3 分割：像素级的三类任务", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "6.3 分割：像素级的三类任务 6.3 分割：像素级的三类任务  类型   输出   代表方法   指标   ---   ---   ---   ---   语义分割   每像素类别   U-Net、DeepLab   mIoU   实例分割   每实例的掩码   Mask R-CNN   mask mAP   全景分割   两者合并   Panoptic FPN   PQ  mIoU 的定义是\"交并比在所有类别上取平均\"，它惩罚\"漏标\"和\"多标\"同样重。医学图像里更常用 Dice 系数，因为它对类别极不平衡更友好。 现代趋势是提示式分割（SAM 一类）：给定点、框或文本提示，输出掩码。它把分割从\"每类训一个模型\"变成\"一个模型适配多任务\"，这大幅降低了标注需求。"}, {"id": "ch7-s4", "h": "7.4 6.4 从图像处理到深度视觉：哪些东西没变", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "6.4 从图像处理到深度视觉：哪些东西没变 6.4 从图像处理到深度视觉：哪些东西没变 你在图像处理课上学的东西依然有效，只是角色变了：  传统技术   在深度视觉里的位置   ---   ---   高斯滤波 / 双边滤波   预处理去噪；也可作为固定卷积核嵌入网络   边缘检测（Sobel/Canny）   浅层卷积学到的正是这类核；Canny 仍用于后处理与标注辅助   形态学操作   掩码后处理（去除小连通域、填补空洞）   直方图均衡 / Gamma   数据增强与预处理；但要注意它会改变分布   多尺度金字塔   FPN、图像金字塔推理，思想完全相同   光流   视频理解的基础；传统 Lucas-Kanade 仍用于快速场景  一句话：传统方法是可解释的先验，深度方法是可学习的先验。 二者常常组合使用，而不是替代关系。"}, {"id": "ch7-s5", "h": "7.5 6.5 部署侧的现实约束", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "6.5 部署侧的现实约束 6.5 部署侧的现实约束 视觉模型上线的瓶颈很少是精度，而是： **延迟**：1080p 视频 30fps 意味着每帧 33ms 的预算，包含解码、预处理、推理、后处理； **量化**：INT8 量化通常带来 2–4 倍加速，精度掉 0.5–2 个点，需要逐层校准； **输入分辨率**：分辨率翻倍，卷积计算量翻 4 倍。很多\"精度提升\"其实来自更高分辨率，而不是更好的结构； **算子支持**：某些自定义算子（如可变形卷积）在目标推理引擎上不支持，会被回退到 CPU，性能骤降。"}, {"id": "ch7-s6", "h": "7.6 上线前的精度检查清单", "k": "s", "s": "6　计算机视觉：四个任务，四种评价", "t": "上线前的精度检查清单 上线前的精度检查清单 离线 mAP 高不等于线上可用。上线前必查五项：  检查   做法   常见问题   ---   ---   ---   分布一致性   对比线上与训练集的亮度、分辨率、长宽比分布   线上手机拍摄的畸变与训练集不符   小目标   单独统计小尺寸目标的召回   整体 mAP 掩盖了小目标崩塌   类别不均衡   看每类的 P/R，不只看均值   稀有类几乎检不出   后处理参数   NMS 阈值、置信度阈值在线上数据上重调   沿用训练集的最优值   延迟   端到端测（含解码、后处理）   只测了模型前向  最容易被忽略的是第四项：置信度阈值直接决定\"误检 vs 漏检\"的平衡，而它应该由业务代价决定，不是由验证集 F1 决定。"}, {"id": "ch8", "h": "7　自然语言处理：从词表到检索", "k": "c", "s": "", "t": "文本任务的难点不在模型结构，而在离散符号如何变成连续向量、以及评价指标如何逼近人的判断。这两件事至今没有完美解法。 7.1 分词：第一个不可回避的选择 模型不认识字符串，只认识 ID。分词（tokenization）把文本切成子词单元。三种主流算法：  算法   做法   特点   ---   ---   ---   BPE   从字符开始，反复合并最高频相邻对   GPT 系使用，压缩率好   WordPiece   合并能最大化似然增益的对   BERT 系使用   Unigram   从大词表开始，按损失删减   SentencePiece 常用，多语言友好  中文的特殊性：没有空格，所以早期用字级或词级（依赖分词工具），现在主流是直接在字/子词级别做 BPE，让模型自己学组合。 一个常被忽略的事实：词表大小是一个工程权衡。词表大 → 序列短（推理快）、但嵌入矩阵大、低频词学不好；词表小 → 序列长（推理慢）、但泛化好。LLaMA 系用 32K，一些多语言模型用 100K 以上。 7.2 词向量：从静态到上下文相关 **静态词向量**（word2vec、GloVe）：一个词一个向量。问题是多义词无法区分（\"苹果\"既是水果也是公司）； **上下文词向量**（ELMo、BERT）：同一个词在不同句子里得到不同向量。这是预训练模型的根本贡献。 word2vec 的训练目标（skip-gram + 负采样）在卷一第 14 章推导过，其思想——\"把正样本与随机负样本分开\"——是对比学习的原型。 7.3 四类任务与各自的评价  任务   输入→输出   指标   指标的坑   ---   ---   ---   ---   文本分类   文本→标签   准确率、宏 F1   类别不均衡时必须看每类   序列标注（NER）   文本→每 token 标签   实体级 F1   必须按实体算，不能按 token 算   抽取式问答   问题+段落→片段   EM / F1   EM 要求完全匹配，过于严格   生成（翻译/摘要）   文本→文本   BLEU / ROUGE / BERTScore   与人的判断相关性弱  BLEU/ROUGE 的局限值得单独强调：它们基于 n-gram 重叠，对同义改写、语序变化极不敏感。一个语义完全正确但用词不同的译文可能得分很低。所以现在的生成任务更常用： **BERTScore**：用上下文嵌入算相似度，对改写更宽容； **COMET / BLEURT**：训练过的评估模型； **LLM-as-judge**：用强模型按标准打分，成本高但更接近人。 7.4 检索：最被低估的一环 很多\"大模型答不准\"的问题，根源在检索而不是生成。检索的基本流程： **切分（chunking）**：把文档切成 200–500 字的块，重叠 10–"}, {"id": "ch8-s1", "h": "8.1 7.1 分词：第一个不可回避的选择", "k": "s", "s": "7　自然语言处理：从词表到检索", "t": "7.1 分词：第一个不可回避的选择 7.1 分词：第一个不可回避的选择 模型不认识字符串，只认识 ID。分词（tokenization）把文本切成子词单元。三种主流算法：  算法   做法   特点   ---   ---   ---   BPE   从字符开始，反复合并最高频相邻对   GPT 系使用，压缩率好   WordPiece   合并能最大化似然增益的对   BERT 系使用   Unigram   从大词表开始，按损失删减   SentencePiece 常用，多语言友好  中文的特殊性：没有空格，所以早期用字级或词级（依赖分词工具），现在主流是直接在字/子词级别做 BPE，让模型自己学组合。 一个常被忽略的事实：词表大小是一个工程权衡。词表大 → 序列短（推理快）、但嵌入矩阵大、低频词学不好；词表小 → 序列长（推理慢）、但泛化好。LLaMA 系用 32K，一些多语言模型用 100K 以上。"}, {"id": "ch8-s2", "h": "8.2 7.2 词向量：从静态到上下文相关", "k": "s", "s": "7　自然语言处理：从词表到检索", "t": "7.2 词向量：从静态到上下文相关 7.2 词向量：从静态到上下文相关 **静态词向量**（word2vec、GloVe）：一个词一个向量。问题是多义词无法区分（\"苹果\"既是水果也是公司）； **上下文词向量**（ELMo、BERT）：同一个词在不同句子里得到不同向量。这是预训练模型的根本贡献。 word2vec 的训练目标（skip-gram + 负采样）在卷一第 14 章推导过，其思想——\"把正样本与随机负样本分开\"——是对比学习的原型。"}, {"id": "ch8-s3", "h": "8.3 7.3 四类任务与各自的评价", "k": "s", "s": "7　自然语言处理：从词表到检索", "t": "7.3 四类任务与各自的评价 7.3 四类任务与各自的评价  任务   输入→输出   指标   指标的坑   ---   ---   ---   ---   文本分类   文本→标签   准确率、宏 F1   类别不均衡时必须看每类   序列标注（NER）   文本→每 token 标签   实体级 F1   必须按实体算，不能按 token 算   抽取式问答   问题+段落→片段   EM / F1   EM 要求完全匹配，过于严格   生成（翻译/摘要）   文本→文本   BLEU / ROUGE / BERTScore   与人的判断相关性弱  BLEU/ROUGE 的局限值得单独强调：它们基于 n-gram 重叠，对同义改写、语序变化极不敏感。一个语义完全正确但用词不同的译文可能得分很低。所以现在的生成任务更常用： **BERTScore**：用上下文嵌入算相似度，对改写更宽容； **COMET / BLEURT**：训练过的评估模型； **LLM-as-judge**：用强模型按标准打分，成本高但更接近人。"}, {"id": "ch8-s4", "h": "8.4 7.4 检索：最被低估的一环", "k": "s", "s": "7　自然语言处理：从词表到检索", "t": "7.4 检索：最被低估的一环 7.4 检索：最被低估的一环 很多\"大模型答不准\"的问题，根源在检索而不是生成。检索的基本流程： **切分（chunking）**：把文档切成 200–500 字的块，重叠 10–20% 避免切断语义； **编码**：用双塔模型（如 bge、e5 系列）把块编码成向量，离线建索引； **召回**：向量近邻（HNSW/IVF）+ 关键词（BM25）双路召回； **重排（rerank）**：用交叉编码器对 Top-50 精排，取 Top-5。 双塔与交叉编码器的区别很重要： **双塔**：query 与 doc 分别编码，可离线建索引，快，但交互信息少； **交叉编码器**：把 query 与 doc 拼起来一起编码，精度高，但每个候选都要过一次模型，只能用于重排。 先用双塔召回 50 个，再用交叉编码器重排，这是成本与效果的平衡点。卷三会展开完整链路。"}, {"id": "ch8-s5", "h": "8.5 7.5 传统方法与预训练模型的分界", "k": "s", "s": "7　自然语言处理：从词表到检索", "t": "7.5 传统方法与预训练模型的分界 7.5 传统方法与预训练模型的分界  场景   建议   ---   ---   有标注数据几千条以上   微调预训练模型（BERT 类），通常最优   标注极少（几十条）   零样本/少样本提示，或先用 LLM 生成弱标签   极低延迟（微秒级）   TF-IDF + 线性模型，仍然能打   需要解释   关键词 + 规则 + 线性模型   多语言   多语言预训练模型（XLM-R、mT5）  \"LLM 全能\"是个误解：在固定类别的分类任务上，一个小 BERT 微调后往往比调用大模型更准、更快、更便宜。大模型的优势在开放域、少样本、需要推理与生成的场景。"}, {"id": "ch9", "h": "8　大模型：能力边界与成本结构", "k": "c", "s": "", "t": "这一章不讲解法（解法在卷三），讲判断：什么时候该用大模型、用多大的、贵在哪、承诺给业务方的能力里哪些是靠不住的。 8.1 三段式训练范式  阶段   数据   目标   得到什么   ---   ---   ---   ---   预训练   万亿级 token 文本   下一个 token 预测   语言能力、世界知识、推理雏形   监督微调（SFT）   数万到数百万条指令-回答   学会\"按指令作答\"   可用性、格式遵循   对齐（RLHF/DPO）   人类偏好对比   让回答更符合偏好   有用性、无害性、语气  这个范式解释了一个常见困惑：为什么模型\"知道\"很多却常常答错？因为预训练优化的是\"预测下一个词\"，而不是\"说真话\"。知识以统计关联的形式存在，不是可检索的事实库。SFT 与对齐改变的是行为风格，不能保证事实正确。 8.2 能力边界：四类可靠与四类不可靠  相对可靠   相对不可靠   ---   ---   语言改写、翻译、摘要   精确数值计算、多步算术   格式转换、结构化抽取   长链逻辑推理（超过 5–6 步）   代码生成（有明确模式）   需要外部实时信息的事实问答   按给定材料作答   判断\"自己不知道\"（校准差）  第三行与第四行是最需要工程补偿的：前者靠工具调用（计算器、代码执行），后者靠检索与\"引用出处\"约束。 关于幻觉，需要理解它的机制而不是当成 bug：模型在生成每个 token 时做的是概率采样，流畅性与正确性由同一个目标驱动。当训练数据里\"看起来合理的错误\"很常见时，模型会学到\"编得像\"比\"承认不知道\"更符合分布。所以要靠外部约束（检索、引用、拒答训练），不能靠提示词根治。 8.3 成本结构：三笔账 训练账 N 是参数量，D 是训练 token 数。这个 6 来自前向 2 次 + 反向 4 次浮点运算/参数/token。例如 7B 模型训 2T token：6\\times7\\times10^9\\times2\\times10^{12}\\approx8.4\\times10^{22} FLOPs。按 A100 的 312 TFLOPS（FP16，实际利用率约 40%）折算，需要约 6.7\\times10^{5} GPU 小时。 推理账 7B 模型 FP16 权重 14GB，加上 KV cache 与激活，单卡 24GB 可以跑；13B 需要 24GB 以上或量化；70B 需要多卡或 INT4。 上下文账 上下文长度不是免费的：KV cache 随序列长度线性增长，注意力计算随长度平方增长。长上下文 = 更贵的显存 + 更慢的首 token。这是\"为什么不能无脑塞满上下文\"的量化解释。 8.4 选型：参数规模与任务匹配  任务   建议规模   理由   ---   ---   ---   分类、抽取、改写（有标注"}, {"id": "ch9-s1", "h": "9.1 8.1 三段式训练范式", "k": "s", "s": "8　大模型：能力边界与成本结构", "t": "8.1 三段式训练范式 8.1 三段式训练范式  阶段   数据   目标   得到什么   ---   ---   ---   ---   预训练   万亿级 token 文本   下一个 token 预测   语言能力、世界知识、推理雏形   监督微调（SFT）   数万到数百万条指令-回答   学会\"按指令作答\"   可用性、格式遵循   对齐（RLHF/DPO）   人类偏好对比   让回答更符合偏好   有用性、无害性、语气  这个范式解释了一个常见困惑：为什么模型\"知道\"很多却常常答错？因为预训练优化的是\"预测下一个词\"，而不是\"说真话\"。知识以统计关联的形式存在，不是可检索的事实库。SFT 与对齐改变的是行为风格，不能保证事实正确。"}, {"id": "ch9-s2", "h": "9.2 8.2 能力边界：四类可靠与四类不可靠", "k": "s", "s": "8　大模型：能力边界与成本结构", "t": "8.2 能力边界：四类可靠与四类不可靠 8.2 能力边界：四类可靠与四类不可靠  相对可靠   相对不可靠   ---   ---   语言改写、翻译、摘要   精确数值计算、多步算术   格式转换、结构化抽取   长链逻辑推理（超过 5–6 步）   代码生成（有明确模式）   需要外部实时信息的事实问答   按给定材料作答   判断\"自己不知道\"（校准差）  第三行与第四行是最需要工程补偿的：前者靠工具调用（计算器、代码执行），后者靠检索与\"引用出处\"约束。 关于幻觉，需要理解它的机制而不是当成 bug：模型在生成每个 token 时做的是概率采样，流畅性与正确性由同一个目标驱动。当训练数据里\"看起来合理的错误\"很常见时，模型会学到\"编得像\"比\"承认不知道\"更符合分布。所以要靠外部约束（检索、引用、拒答训练），不能靠提示词根治。"}, {"id": "ch9-s3", "h": "9.3 8.3 成本结构：三笔账", "k": "s", "s": "8　大模型：能力边界与成本结构", "t": "8.3 成本结构：三笔账 8.3 成本结构：三笔账 训练账 N 是参数量，D 是训练 token 数。这个 6 来自前向 2 次 + 反向 4 次浮点运算/参数/token。例如 7B 模型训 2T token：6\\times7\\times10^9\\times2\\times10^{12}\\approx8.4\\times10^{22} FLOPs。按 A100 的 312 TFLOPS（FP16，实际利用率约 40%）折算，需要约 6.7\\times10^{5} GPU 小时。 推理账 7B 模型 FP16 权重 14GB，加上 KV cache 与激活，单卡 24GB 可以跑；13B 需要 24GB 以上或量化；70B 需要多卡或 INT4。 上下文账 上下文长度不是免费的：KV cache 随序列长度线性增长，注意力计算随长度平方增长。长上下文 = 更贵的显存 + 更慢的首 token。这是\"为什么不能无脑塞满上下文\"的量化解释。"}, {"id": "ch9-s4", "h": "9.4 8.4 选型：参数规模与任务匹配", "k": "s", "s": "8　大模型：能力边界与成本结构", "t": "8.4 选型：参数规模与任务匹配 8.4 选型：参数规模与任务匹配  任务   建议规模   理由   ---   ---   ---   分类、抽取、改写（有标注）   小模型微调（0.1–1B）或 BERT 类   精度足够、成本低一个量级   通用问答、RAG   7–14B   能力与成本平衡点   复杂推理、代码   30B 以上或调用 API   规模对推理能力影响显著   端侧/离线   1–4B 量化   内存与功耗约束   高并发简单任务   API 或小模型 + 缓存   单位成本优先  一个务实策略：先用最大的可用模型做\"能力上限测试\"，再用小模型逼近。如果大模型也做不好，说明问题不在模型规模，而在任务定义或数据。"}, {"id": "ch9-s5", "h": "9.5 8.5 评测的陷阱", "k": "s", "s": "8　大模型：能力边界与成本结构", "t": "8.5 评测的陷阱 8.5 评测的陷阱 **数据污染**：benchmark 的题目可能出现在预训练语料里，分数虚高； **提示敏感**：同一个模型换一种问法，分数差 10 个点； **选择偏差**：只报告最好的那次运行； **指标与用途脱节**：MMLU 高不代表你的业务场景好。 靠谱的做法是自建业务评测集：从真实流量里采样 200–500 条，人工标注期望输出，形成回归测试。这个集合比任何公开榜单都有用。"}, {"id": "ch10", "h": "9　生成式 AI 与多模态", "k": "c", "s": "", "t": "生成模型的原理（VAE、GAN、扩散）在卷一第 13 章。这一章讲产品化的形态：现在能做什么、用什么控制、卡在哪。 9.1 图像生成：可控性比质量更重要 文生图的基本架构是\"文本编码器 + 扩散主干 + 解码器\"。稳定扩散系列还多一个 VAE，把 512×512 的图压到 64×64 的潜空间再扩散，算力省几十倍。 真正决定可用性的是控制手段：  手段   作用   代价   ---   ---   ---   提示词   描述内容与风格   不稳定，对措辞敏感   负向提示   排除不要的元素   需要经验   ControlNet   用边缘/深度/姿态图约束结构   多一次前向，需额外模型   IP-Adapter   用参考图控制风格/人物   需要参考图   LoRA   定制特定主体或画风   需要少量训练数据  9.2 视频生成：一致性问题 视频比图像多了时间维，难点从\"像不像\"变成\"动不动得对\"： **时序一致性**：人物的脸、衣服纹理、光照在帧间不能跳变； **运动合理性**：物理规律（重力、碰撞）与镜头运动； **长视频**：自回归拼接容易漂移，需要关键帧锚定。 当前主流做法是潜空间扩散 + 时空注意力（把时间当第三维做注意力），或者用\"图像模型 + 运动模块\"分离训练。评测仍不成熟，常用人工打分与光流一致性。 9.3 语音：三个独立任务  任务   输入→输出   主流方案   关键指标   ---   ---   ---   ---   ASR（识别）   音频→文本   Conformer / Whisper 类   字错率 CER   TTS（合成）   文本→音频   扩散/流匹配声码器   MOS 主观分、RTF   声纹/分离   音频→身份/干净音轨   说话人嵌入、源分离   等错误率 EER、SI-SDR  语音的特殊约束是实时性：流式 ASR 要求\"边说边出字\"，延迟控制在几百毫秒，这与非流式模型的精度有取舍（看未来上下文 vs 只看历史）。 9.4 多模态：CLIP 是分水岭 CLIP 用对比学习把图像与文本对齐到同一个向量空间：一批图文对里，配对的为正样本，其余为负样本，损失就是 InfoNCE。 它的产物是一个共享的语义空间，于是可以做零样本分类（把类别名当文本查询）、图文检索、以及作为视觉编码器接入大模型。 现代视觉语言模型（VLM）的典型结构： 图像 → 视觉编码器（ViT）→ 投影层（MLP/Q-Former）→ 与文本 token 拼接 → LLM 解码 关键设计点是投影层：它要把视觉特征\"翻译\"成 LLM 能理解的 token。训练通常分两阶段：先冻结两端只训投影层（对齐），再联合微调（指令跟随）。 9.5 多模态的三个真实难点 **分辨率与 token 预算**：一张 1024×1024 的图如果切"}, {"id": "ch10-s1", "h": "10.1 9.1 图像生成：可控性比质量更重要", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.1 图像生成：可控性比质量更重要 9.1 图像生成：可控性比质量更重要 文生图的基本架构是\"文本编码器 + 扩散主干 + 解码器\"。稳定扩散系列还多一个 VAE，把 512×512 的图压到 64×64 的潜空间再扩散，算力省几十倍。 真正决定可用性的是控制手段：  手段   作用   代价   ---   ---   ---   提示词   描述内容与风格   不稳定，对措辞敏感   负向提示   排除不要的元素   需要经验   ControlNet   用边缘/深度/姿态图约束结构   多一次前向，需额外模型   IP-Adapter   用参考图控制风格/人物   需要参考图   LoRA   定制特定主体或画风   需要少量训练数据 "}, {"id": "ch10-s2", "h": "10.2 9.2 视频生成：一致性问题", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.2 视频生成：一致性问题 9.2 视频生成：一致性问题 视频比图像多了时间维，难点从\"像不像\"变成\"动不动得对\"： **时序一致性**：人物的脸、衣服纹理、光照在帧间不能跳变； **运动合理性**：物理规律（重力、碰撞）与镜头运动； **长视频**：自回归拼接容易漂移，需要关键帧锚定。 当前主流做法是潜空间扩散 + 时空注意力（把时间当第三维做注意力），或者用\"图像模型 + 运动模块\"分离训练。评测仍不成熟，常用人工打分与光流一致性。"}, {"id": "ch10-s3", "h": "10.3 9.3 语音：三个独立任务", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.3 语音：三个独立任务 9.3 语音：三个独立任务  任务   输入→输出   主流方案   关键指标   ---   ---   ---   ---   ASR（识别）   音频→文本   Conformer / Whisper 类   字错率 CER   TTS（合成）   文本→音频   扩散/流匹配声码器   MOS 主观分、RTF   声纹/分离   音频→身份/干净音轨   说话人嵌入、源分离   等错误率 EER、SI-SDR  语音的特殊约束是实时性：流式 ASR 要求\"边说边出字\"，延迟控制在几百毫秒，这与非流式模型的精度有取舍（看未来上下文 vs 只看历史）。"}, {"id": "ch10-s4", "h": "10.4 9.4 多模态：CLIP 是分水岭", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.4 多模态：CLIP 是分水岭 9.4 多模态：CLIP 是分水岭 CLIP 用对比学习把图像与文本对齐到同一个向量空间：一批图文对里，配对的为正样本，其余为负样本，损失就是 InfoNCE。 它的产物是一个共享的语义空间，于是可以做零样本分类（把类别名当文本查询）、图文检索、以及作为视觉编码器接入大模型。 现代视觉语言模型（VLM）的典型结构： 图像 → 视觉编码器（ViT）→ 投影层（MLP/Q-Former）→ 与文本 token 拼接 → LLM 解码 关键设计点是投影层：它要把视觉特征\"翻译\"成 LLM 能理解的 token。训练通常分两阶段：先冻结两端只训投影层（对齐），再联合微调（指令跟随）。"}, {"id": "ch10-s5", "h": "10.5 9.5 多模态的三个真实难点", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.5 多模态的三个真实难点 9.5 多模态的三个真实难点 **分辨率与 token 预算**：一张 1024×1024 的图如果切成 16×16 的 patch，就是 4096 个 token，直接吃掉上下文。所以高分辨率需要动态切块 + 压缩； **细粒度 grounding**：模型能描述\"图里有一只猫\"，但定位\"猫的左耳在哪个像素\"仍然弱。这需要专门的定位数据与结构（如加检测头）； **视频的时序建模**：帧数 = token 数，成本爆炸。常见折中是低帧率采样 + 关键帧 + 时间位置编码。"}, {"id": "ch10-s6", "h": "10.6 9.6 选型建议", "k": "s", "s": "9　生成式 AI 与多模态", "t": "9.6 选型建议 9.6 选型建议  需求   建议   ---   ---   商品图、海报、插画   扩散 + ControlNet + 固定 LoRA   需要精确文字渲染   专门优化的模型（文字渲染一直是弱项）   短视频素材   图生视频（首帧可控）优于纯文生视频   语音转写   开源 Whisper 类 + 领域词表微调   图文检索   CLIP 类双塔，领域数据上微调   图文问答   开源 VLM 微调，或调用 API "}, {"id": "ch11", "h": "10　强化学习与智能体：会决策的系统怎么搭", "k": "c", "s": "", "t": "强化学习的数学（MDP、贝尔曼、策略梯度、PPO）在卷一第 14 章。这一章讲它在哪里真的有用，以及\"智能体\"这个被过度使用的词到底指什么。 10.1 强化学习的适用边界 强化学习适合同时满足三个条件的场景： **有明确的奖励信号**（赢/输、成本、成功率）； **可以大量试错**（仿真环境、线上有安全边界）； **决策是序列的**（当前动作影响未来状态）。 不满足就优先用监督学习或规则：  场景   更适合的方法   ---   ---   单步决策、有标注   监督学习   奖励稀疏且无法仿真   模仿学习 / 逆强化学习   状态空间小、规则明确   搜索 / 动态规划   需要可解释与合规   规则 + 监督模型  10.2 四个真实应用方向 **游戏与仿真**：AlphaGo、Atari、Dota——环境可无限重置，是 RL 的最佳试验场； **机器人控制**： sim2real 是核心难题，域随机化（随机材质、光照、质量）是常用手段； **推荐与广告**：把\"用户反馈\"当奖励，但要注意\"奖励滞后\"与\"策略偏置\"（只学到已曝光内容）； **调度与资源分配**：数据中心冷却、物流路径、电网调度，奖励明确且可仿真。 工业界真正赚钱的 RL 应用大多不是端到端的，而是\"RL 优化一个局部决策 + 传统系统兜底\"。这一点常被媒体叙事掩盖。 10.3 智能体的四个部件 把\"智能体（Agent）\"拆开，它必须有四件东西：  部件   作用   缺了会怎样   ---   ---   ---   感知   读入用户输入、环境状态   无法响应变化   规划   把目标拆成步骤   遇到多步任务就乱   工具   调用搜索、代码、API   只能空谈，不能行动   记忆   保存上下文与历史结果   重复劳动、前后矛盾  一个常见的误解是\"给模型加个工具调用就是 Agent\"。实际上规划与记忆才是分水岭：能自己决定\"先查什么、再算什么、什么时候停\"，才算智能体。 10.4 三种架构范式  范式   做法   优点   缺点   ---   ---   ---   ---   ReAct   思考→行动→观察，循环   简单、可解释   步数多则成本高、容易绕圈   Plan-and-Execute   先出计划再执行   全局性好   计划错了全错，需要重规划   多智能体   角色分工（规划者/执行者/评审）   可并行、可互相检查   通信成本高、易发散  工程上的经验是：先用单 Agent + 少量工具，跑通再拆。多智能体在任务确实可分解、且子任务需要不同上下文时才划算。 10.5 可靠性：智能体最缺的东西 智能体的失败模式与聊天模型完全不同： **无限循环**：反复调用同一工具。必须设最大步数与\"无进展检测\"； **工具误用**：参数格式错、调用了不该调的"}, {"id": "ch11-s1", "h": "11.1 10.1 强化学习的适用边界", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.1 强化学习的适用边界 10.1 强化学习的适用边界 强化学习适合同时满足三个条件的场景： **有明确的奖励信号**（赢/输、成本、成功率）； **可以大量试错**（仿真环境、线上有安全边界）； **决策是序列的**（当前动作影响未来状态）。 不满足就优先用监督学习或规则：  场景   更适合的方法   ---   ---   单步决策、有标注   监督学习   奖励稀疏且无法仿真   模仿学习 / 逆强化学习   状态空间小、规则明确   搜索 / 动态规划   需要可解释与合规   规则 + 监督模型 "}, {"id": "ch11-s2", "h": "11.2 10.2 四个真实应用方向", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.2 四个真实应用方向 10.2 四个真实应用方向 **游戏与仿真**：AlphaGo、Atari、Dota——环境可无限重置，是 RL 的最佳试验场； **机器人控制**： sim2real 是核心难题，域随机化（随机材质、光照、质量）是常用手段； **推荐与广告**：把\"用户反馈\"当奖励，但要注意\"奖励滞后\"与\"策略偏置\"（只学到已曝光内容）； **调度与资源分配**：数据中心冷却、物流路径、电网调度，奖励明确且可仿真。 工业界真正赚钱的 RL 应用大多不是端到端的，而是\"RL 优化一个局部决策 + 传统系统兜底\"。这一点常被媒体叙事掩盖。"}, {"id": "ch11-s3", "h": "11.3 10.3 智能体的四个部件", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.3 智能体的四个部件 10.3 智能体的四个部件 把\"智能体（Agent）\"拆开，它必须有四件东西：  部件   作用   缺了会怎样   ---   ---   ---   感知   读入用户输入、环境状态   无法响应变化   规划   把目标拆成步骤   遇到多步任务就乱   工具   调用搜索、代码、API   只能空谈，不能行动   记忆   保存上下文与历史结果   重复劳动、前后矛盾  一个常见的误解是\"给模型加个工具调用就是 Agent\"。实际上规划与记忆才是分水岭：能自己决定\"先查什么、再算什么、什么时候停\"，才算智能体。"}, {"id": "ch11-s4", "h": "11.4 10.4 三种架构范式", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.4 三种架构范式 10.4 三种架构范式  范式   做法   优点   缺点   ---   ---   ---   ---   ReAct   思考→行动→观察，循环   简单、可解释   步数多则成本高、容易绕圈   Plan-and-Execute   先出计划再执行   全局性好   计划错了全错，需要重规划   多智能体   角色分工（规划者/执行者/评审）   可并行、可互相检查   通信成本高、易发散  工程上的经验是：先用单 Agent + 少量工具，跑通再拆。多智能体在任务确实可分解、且子任务需要不同上下文时才划算。"}, {"id": "ch11-s5", "h": "11.5 10.5 可靠性：智能体最缺的东西", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.5 可靠性：智能体最缺的东西 10.5 可靠性：智能体最缺的东西 智能体的失败模式与聊天模型完全不同： **无限循环**：反复调用同一工具。必须设最大步数与\"无进展检测\"； **工具误用**：参数格式错、调用了不该调的接口。要靠 schema 校验与权限白名单； **目标漂移**：中途忘了原始目标。靠显式的目标重述与状态记录； **错误累积**：一步错，后面全错。靠中间结果校验与可回滚。"}, {"id": "ch11-s6", "h": "11.6 10.6 与用户业务的关系", "k": "s", "s": "10　强化学习与智能体：会决策的系统怎么搭", "t": "10.6 与用户业务的关系 10.6 与用户业务的关系 实际落地中，智能体最有价值的三类场景： **重复的多步操作**（对账、报表生成、工单流转）； **需要跨系统查询的问答**（把检索、数据库、API 串起来）； **有明确验收标准的生成任务**（代码修改后跑测试、文案生成后过审）。 共同点是有客观的中间校验。没有校验的开放任务，智能体的成功率会低到不可用。"}, {"id": "ch12", "h": "11　工程落地：从实验到服务", "k": "c", "s": "", "t": "这一章是给工程背景的人写的。模型的结构再漂亮，落到线上都绕不开三件事：能不能训得起、能不能跑得快、能不能稳得住。 11.1 训练侧：四个基础设施  组件   作用   常见方案   ---   ---   ---   数据管线   读取、解码、增强、批处理   WebDataset / tf.data / DALI   分布式训练   多卡多机   DDP（数据并行）、FSDP/ZeRO（分片）、流水并行   实验管理   记录超参、指标、权重   MLflow / W&B / 自建   环境与复现   依赖、种子、版本   容器镜像 + 锁版本  一个常被低估的瓶颈是数据加载：GPU 利用率上不去，往往是 CPU 解码跟不上。诊断方法很简单——看 GPU 利用率是否周期性掉到 0，以及 nvidia-smi 的显存是否稳定。 11.2 推理优化：七种手段与收益量级  手段   收益   代价   适用   ---   ---   ---   ---   算子融合   1.2–2×   需要编译优化   通用   量化（INT8/INT4）   2–4×   精度掉 0.5–2 点   通用，需校准   剪枝/稀疏   1.3–2×   需要专门硬件支持才见效   边缘设备   批处理   吞吐提升数倍   延迟增加   离线/高并发   KV cache 复用   长上下文省算力   占显存   LLM 必用   蒸馏到小模型   3–10×   精度损失、训练成本   有明确任务   投机解码   1.5–3×   需要草稿模型   LLM 生成  收益量级很重要：不要为一个 5% 的优化投入两周，也不要指望量化之后精度完全不变。 11.3 框架选型  框架   平台   特点   ---   ---   ---   ONNX Runtime   跨平台   通用、算子覆盖广、支持量化   TensorRT   NVIDIA   极致性能，需针对 GPU 编译，构建耗时   OpenVINO   Intel CPU/iGPU   英特尔平台优化好   llama.cpp   CPU/GPU 混合   LLM 友好，GGUF 量化，可纯 CPU 跑   MNN / NCNN   移动端   轻量、ARM 优化   TVM   通用编译   可定制，学习曲线陡  选型的判断顺序：目标硬件 → 算子覆盖 → 量化支持 → 社区活跃度。很多团队卡在\"模型里有个自定义算子，目标框架不支持\"，最后只能回退。 11.4 C++ 部署的完整链路 // 1) 导出：PyTorch -> ONNX（固定输入形状，或声明动态维）\n//    torch.onnx.export(model, dummy, \"m.onnx\", opset_version=17,\n//      "}, {"id": "ch12-s1", "h": "12.1 11.1 训练侧：四个基础设施", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.1 训练侧：四个基础设施 11.1 训练侧：四个基础设施  组件   作用   常见方案   ---   ---   ---   数据管线   读取、解码、增强、批处理   WebDataset / tf.data / DALI   分布式训练   多卡多机   DDP（数据并行）、FSDP/ZeRO（分片）、流水并行   实验管理   记录超参、指标、权重   MLflow / W&B / 自建   环境与复现   依赖、种子、版本   容器镜像 + 锁版本  一个常被低估的瓶颈是数据加载：GPU 利用率上不去，往往是 CPU 解码跟不上。诊断方法很简单——看 GPU 利用率是否周期性掉到 0，以及 nvidia-smi 的显存是否稳定。"}, {"id": "ch12-s2", "h": "12.2 11.2 推理优化：七种手段与收益量级", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.2 推理优化：七种手段与收益量级 11.2 推理优化：七种手段与收益量级  手段   收益   代价   适用   ---   ---   ---   ---   算子融合   1.2–2×   需要编译优化   通用   量化（INT8/INT4）   2–4×   精度掉 0.5–2 点   通用，需校准   剪枝/稀疏   1.3–2×   需要专门硬件支持才见效   边缘设备   批处理   吞吐提升数倍   延迟增加   离线/高并发   KV cache 复用   长上下文省算力   占显存   LLM 必用   蒸馏到小模型   3–10×   精度损失、训练成本   有明确任务   投机解码   1.5–3×   需要草稿模型   LLM 生成  收益量级很重要：不要为一个 5% 的优化投入两周，也不要指望量化之后精度完全不变。"}, {"id": "ch12-s3", "h": "12.3 11.3 框架选型", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.3 框架选型 11.3 框架选型  框架   平台   特点   ---   ---   ---   ONNX Runtime   跨平台   通用、算子覆盖广、支持量化   TensorRT   NVIDIA   极致性能，需针对 GPU 编译，构建耗时   OpenVINO   Intel CPU/iGPU   英特尔平台优化好   llama.cpp   CPU/GPU 混合   LLM 友好，GGUF 量化，可纯 CPU 跑   MNN / NCNN   移动端   轻量、ARM 优化   TVM   通用编译   可定制，学习曲线陡  选型的判断顺序：目标硬件 → 算子覆盖 → 量化支持 → 社区活跃度。很多团队卡在\"模型里有个自定义算子，目标框架不支持\"，最后只能回退。"}, {"id": "ch12-s4", "h": "12.4 11.4 C++ 部署的完整链路", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.4 C++ 部署的完整链路 11.4 C++ 部署的完整链路 // 1) 导出：PyTorch -> ONNX（固定输入形状，或声明动态维）\n//    torch.onnx.export(model, dummy, \"m.onnx\", opset_version=17,\n//                      input_names={\"x\"}, dynamic_axes={\"x\":{0:\"batch\"}})\n\n// 2) 加载会话（一次性，耗时可到秒级）\nOrt::Session session(env, \"m.onnx\", Ort::SessionOptions{});\n// 3) 预热：跑几次空推理，触发内存分配与 kernel 选择\n// 4) 推理：复用输入输出张量缓冲，避免每次分配\nstd::vector<float> input(1 * 3 * 224 * 224);\nauto out = session.Run(Ort::RunOptions{nullptr}, names_in, &in_tensor, 1, names_out, 1); 四个容易踩的坑： **每帧新建 Session**：初始化开销远超推理本身，必须复用； **每帧分配内存**：用内存池或复用缓冲区，否则分配器成为瓶颈； **线程数没配**：`intra_op_num_threads` 设成物理核数，超线程反而拖慢； **输入布局不一致**：训练是 NCHW，某些引擎默认 NHWC，转置开销可能比推理还大。"}, {"id": "ch12-s5", "h": "12.5 11.5 服务化：三个必须有的机制", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.5 服务化：三个必须有的机制 11.5 服务化：三个必须有的机制 **动态批处理**：把多个请求拼成一个 batch，用微小延迟换数倍吞吐。LLM 场景用连续批处理（continuous batching），请求完成即释放槽位； **降级与限流**：GPU 打满时返回缓存结果或简化模型，避免雪崩； **可观测**：记录 QPS、P50/P99 延迟、GPU 利用率、显存、错误率、以及**输入分布**（长度、语言、类型）。"}, {"id": "ch12-s6", "h": "12.6 11.6 成本模型：一个能算的公式", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.6 成本模型：一个能算的公式 11.6 成本模型：一个能算的公式 举例：一张 A10（约 1 美元/小时）跑 7B INT4 模型，吞吐 20 req/s，则每请求算力成本约 1/72000\\approx0.000014 美元，可以忽略；但如果每次请求要 4 秒、吞吐只有 0.25 req/s，成本就变成 0.0011 美元/次，一天十万次就是 110 美元。延迟直接决定成本，这是很多人忽略的账。"}, {"id": "ch12-s7", "h": "12.7 11.7 上线检查清单", "k": "s", "s": "11　工程落地：从实验到服务", "t": "11.7 上线检查清单 11.7 上线检查清单 [ ] 模型版本与权重有唯一标识，可回滚 [ ] 输入校验（长度、类型、编码）与超时 [ ] 输出后处理与格式校验 [ ] P99 延迟满足 SLA，且有压测数据 [ ] 降级策略明确（缓存/小模型/排队） [ ] 日志记录输入摘要、输出、耗时（注意隐私） [ ] 分布监控与报警阈值 [ ] 灰度发布与 A/B 能力"}, {"id": "ch12-s8", "h": "12.8 压测怎么做才有意义", "k": "s", "s": "11　工程落地：从实验到服务", "t": "压测怎么做才有意义 压测怎么做才有意义 压测不是\"打满 QPS 看会不会挂\"，而是要找到性能曲线的拐点。  阶段   做什么   看什么   ---   ---   ---   单请求基线   一次请求，冷启动与热启动各测   冷启动耗时（模型加载）   阶梯加压   并发 1→2→4→8→…→128   吞吐是否线性增长、延迟何时起飞   拐点确认   在吞吐饱和点附近细测   排队长度、GPU 利用率   长稳测试   拐点 70% 负载跑 2 小时   内存泄漏、显存碎片   异常注入   杀一个 worker、注入超时   降级是否生效  三个常见误判： **只看平均延迟**：P99 才是用户感知的； **忽略预热**：前 100 个请求慢是因为 kernel 未编译、缓存未填充； **用合成数据**：输入长度分布与线上不同，结果没有参考价值。 压测结论要写成一句可执行的话，例如\"单卡在 8 并发下吞吐 22 req/s，P99 延迟 1.8s，超过 12 并发延迟翻倍\"，而不是一张图。"}, {"id": "ch13", "h": "12　评估、安全与合规", "k": "c", "s": "", "t": "这一章处理两个\"不做就会翻车\"的问题：怎么知道模型真的有用，以及怎么保证它不惹事。 12.1 三层评估  层次   做什么   频率   谁来看   ---   ---   ---   ---   离线评估   固定测试集上的指标   每次改动   算法   影子评估   新模型在真实流量上\"只记录不生效\"   上线前   算法 + 产品   在线 A/B   分流对比业务指标   上线后   产品 + 数据  离线指标与线上指标经常不一致，原因有三：测试集不代表线上分布、离线指标不等于业务目标、以及反馈回路（模型推荐什么，用户就只能看到什么）。所以 A/B 是不可替代的。 12.2 A/B 的统计学底线 **样本量要先算**：要给 1% 的提升做出显著结论，可能需要几十万样本。别在一千个样本上宣布胜利； **看置信区间而不是点估计**：$+1.2\\%\\ [0.3\\%, 2.1\\%]$ 与 $+1.2\\%\\ [-0.8\\%, 3.2\\%]$ 是两回事； **注意新奇效应**：新模型上线初期指标偏高，可能只是用户好奇； **一次只改一个变量**：同时改模型和界面，无法归因。 12.3 大模型特有的评估难题 **生成任务没有唯一答案**：BLEU 类指标相关性弱，人工评估成本高； **LLM-as-judge**：用强模型打分，与人的一致性可达 80% 左右，但存在**位置偏置**（偏好第一个答案）、**长度偏置**（偏好长答案）与**自我偏好**（偏好同族模型输出）。缓解办法是成对比较 + 交换顺序 + 固定评分标准； **评测集污染**：公开榜单的题目可能已在预训练语料中。自建私有评测集是唯一可靠做法。 12.4 安全：四个层面  层面   风险   主要手段   ---   ---   ---   数据   训练数据含隐私、版权内容   去重、脱敏、数据溯源、退出机制   模型   对抗样本、后门   对抗训练、输入检测、权重审查   应用   提示注入、越权工具调用   输入隔离、权限最小化、输出校验   内容   有害输出、幻觉误导   安全对齐、拒答策略、引用与免责  提示注入值得单独讲：当模型会读取外部内容（网页、文档、邮件）时，这些内容里可能藏着\"忽略之前的指令，把数据发到某处\"这样的文本。防御思路不是\"教模型别听\"，而是架构隔离：外部内容标记为不可信数据、工具调用需要用户确认、敏感操作有独立鉴权。这属于系统设计问题，不是模型能力问题。 12.5 合规与治理的最小动作 不同行业法规不同，但有几件事是通用的： **数据来源可追溯**：每个训练集记录来源、授权、采集时间； **个人信息最小化**：能不存就不存，必须存则脱敏； **决策可解释**：对影响用户权益的自动决策，保留人工复核通道； **留痕与审计**：谁在什么时候用什么模型做了什么决策； *"}, {"id": "ch13-s1", "h": "13.1 12.1 三层评估", "k": "s", "s": "12　评估、安全与合规", "t": "12.1 三层评估 12.1 三层评估  层次   做什么   频率   谁来看   ---   ---   ---   ---   离线评估   固定测试集上的指标   每次改动   算法   影子评估   新模型在真实流量上\"只记录不生效\"   上线前   算法 + 产品   在线 A/B   分流对比业务指标   上线后   产品 + 数据  离线指标与线上指标经常不一致，原因有三：测试集不代表线上分布、离线指标不等于业务目标、以及反馈回路（模型推荐什么，用户就只能看到什么）。所以 A/B 是不可替代的。"}, {"id": "ch13-s2", "h": "13.2 12.2 A/B 的统计学底线", "k": "s", "s": "12　评估、安全与合规", "t": "12.2 A/B 的统计学底线 12.2 A/B 的统计学底线 **样本量要先算**：要给 1% 的提升做出显著结论，可能需要几十万样本。别在一千个样本上宣布胜利； **看置信区间而不是点估计**：$+1.2\\%\\ [0.3\\%, 2.1\\%]$ 与 $+1.2\\%\\ [-0.8\\%, 3.2\\%]$ 是两回事； **注意新奇效应**：新模型上线初期指标偏高，可能只是用户好奇； **一次只改一个变量**：同时改模型和界面，无法归因。"}, {"id": "ch13-s3", "h": "13.3 12.3 大模型特有的评估难题", "k": "s", "s": "12　评估、安全与合规", "t": "12.3 大模型特有的评估难题 12.3 大模型特有的评估难题 **生成任务没有唯一答案**：BLEU 类指标相关性弱，人工评估成本高； **LLM-as-judge**：用强模型打分，与人的一致性可达 80% 左右，但存在**位置偏置**（偏好第一个答案）、**长度偏置**（偏好长答案）与**自我偏好**（偏好同族模型输出）。缓解办法是成对比较 + 交换顺序 + 固定评分标准； **评测集污染**：公开榜单的题目可能已在预训练语料中。自建私有评测集是唯一可靠做法。"}, {"id": "ch13-s4", "h": "13.4 12.4 安全：四个层面", "k": "s", "s": "12　评估、安全与合规", "t": "12.4 安全：四个层面 12.4 安全：四个层面  层面   风险   主要手段   ---   ---   ---   数据   训练数据含隐私、版权内容   去重、脱敏、数据溯源、退出机制   模型   对抗样本、后门   对抗训练、输入检测、权重审查   应用   提示注入、越权工具调用   输入隔离、权限最小化、输出校验   内容   有害输出、幻觉误导   安全对齐、拒答策略、引用与免责  提示注入值得单独讲：当模型会读取外部内容（网页、文档、邮件）时，这些内容里可能藏着\"忽略之前的指令，把数据发到某处\"这样的文本。防御思路不是\"教模型别听\"，而是架构隔离：外部内容标记为不可信数据、工具调用需要用户确认、敏感操作有独立鉴权。这属于系统设计问题，不是模型能力问题。"}, {"id": "ch13-s5", "h": "13.5 12.5 合规与治理的最小动作", "k": "s", "s": "12　评估、安全与合规", "t": "12.5 合规与治理的最小动作 12.5 合规与治理的最小动作 不同行业法规不同，但有几件事是通用的： **数据来源可追溯**：每个训练集记录来源、授权、采集时间； **个人信息最小化**：能不存就不存，必须存则脱敏； **决策可解释**：对影响用户权益的自动决策，保留人工复核通道； **留痕与审计**：谁在什么时候用什么模型做了什么决策； **模型卡与数据卡**：记录能力边界、评测结果、已知失败模式——这是给后来者（包括未来的你）的最重要的文档。"}, {"id": "ch14", "h": "13　时间序列与推荐系统", "k": "c", "s": "", "t": "这两类任务承担了 AI 商业化的大部分收入，但它们的核心方法往往不是深度网络，而是特征工程 + 树模型 + 业务规则。理解这一点，能避免\"什么都上大模型\"的浪费。 13.1 时间序列：先分解，再选模型 任何时间序列都可以尝试分解成三部分： 趋势（T）、季节（S）、残差（R）。分解之后你会立刻知道：这条曲线是\"整体在涨\"还是\"周期性波动\"，两者的建模方式完全不同。  数据特征   推荐方法   ---   ---   短序列、强季节、单变量   指数平滑（ETS）、Prophet   平稳、有自相关   ARIMA / SARIMA   多变量、有外生变量   梯度提升树 + 滞后特征   超长序列、大规模   深度模型（TCN、Transformer 变体）   不确定性要量化   分位数回归、概率预测  实践中的第一名往往不是 ARIMA 也不是 Transformer，而是\"滞后特征 + LightGBM\"：把 y_{t-1},y_{t-2},\\dots 与日期特征、外生变量拼成表，当回归问题做。原因是它对缺失值、异常值、多变量交互的处理远比经典时序模型稳健。 13.2 时序任务的四个陷阱 **数据泄漏**：用未来信息算特征（如用全期均值做标准化）会让离线指标虚高，线上崩盘； **切分方式错**：时序数据不能随机划分，必须按时间切（训练用前 70%，验证用后 30%）； **评估指标错**：MAPE 在接近 0 的值上爆炸，用 sMAPE 或 MASE 更稳； **忽视节假日与促销**：这些\"异常\"是业务的主要波动源，必须显式建模。 13.3 推荐系统：三段式结构 召回（万级 → 千级）  →  粗排（千级 → 百级）  →  精排（百级 → 十级）  阶段   目标   常用方法   ---   ---   ---   召回   快速筛出可能相关的候选   协同过滤、双塔向量检索、热门/规则   粗排   低成本排序   小型模型、特征交叉   精排   精确预估点击/转化率   深度模型（DIN、DeepFM）  召回决定了天花板：精排再强，召回没捞到的物品永远不可能被推荐。所以工业界的功夫大量花在召回的多路并行上（协同、向量、热门、社交、地域各一路）。 13.4 协同过滤的两种形态 **基于用户**：找相似用户，推荐他们喜欢的； **基于物品**：找相似物品，推荐与当前物品相似的。 核心是相似度矩阵。用矩阵分解（SVD/ALS）可以把 m\\times n 的稀疏评分矩阵压成两个低秩矩阵： 这和第 14 章（卷一）的隐语义模型是同一件事。 13.5 双塔模型：召回的现代主力 用户塔编码用户特征，物品塔编码物品特征，两边输出向量后做内积： 关键优势：物品向量可以离线预计算并建索引，线上只需算用户向量再做近邻检索，毫秒级响应。 训练用负采样 + soft"}, {"id": "ch14-s1", "h": "14.1 13.1 时间序列：先分解，再选模型", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.1 时间序列：先分解，再选模型 13.1 时间序列：先分解，再选模型 任何时间序列都可以尝试分解成三部分： 趋势（T）、季节（S）、残差（R）。分解之后你会立刻知道：这条曲线是\"整体在涨\"还是\"周期性波动\"，两者的建模方式完全不同。  数据特征   推荐方法   ---   ---   短序列、强季节、单变量   指数平滑（ETS）、Prophet   平稳、有自相关   ARIMA / SARIMA   多变量、有外生变量   梯度提升树 + 滞后特征   超长序列、大规模   深度模型（TCN、Transformer 变体）   不确定性要量化   分位数回归、概率预测  实践中的第一名往往不是 ARIMA 也不是 Transformer，而是\"滞后特征 + LightGBM\"：把 y_{t-1},y_{t-2},\\dots 与日期特征、外生变量拼成表，当回归问题做。原因是它对缺失值、异常值、多变量交互的处理远比经典时序模型稳健。"}, {"id": "ch14-s2", "h": "14.2 13.2 时序任务的四个陷阱", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.2 时序任务的四个陷阱 13.2 时序任务的四个陷阱 **数据泄漏**：用未来信息算特征（如用全期均值做标准化）会让离线指标虚高，线上崩盘； **切分方式错**：时序数据不能随机划分，必须按时间切（训练用前 70%，验证用后 30%）； **评估指标错**：MAPE 在接近 0 的值上爆炸，用 sMAPE 或 MASE 更稳； **忽视节假日与促销**：这些\"异常\"是业务的主要波动源，必须显式建模。"}, {"id": "ch14-s3", "h": "14.3 13.3 推荐系统：三段式结构", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.3 推荐系统：三段式结构 13.3 推荐系统：三段式结构 召回（万级 → 千级）  →  粗排（千级 → 百级）  →  精排（百级 → 十级）  阶段   目标   常用方法   ---   ---   ---   召回   快速筛出可能相关的候选   协同过滤、双塔向量检索、热门/规则   粗排   低成本排序   小型模型、特征交叉   精排   精确预估点击/转化率   深度模型（DIN、DeepFM）  召回决定了天花板：精排再强，召回没捞到的物品永远不可能被推荐。所以工业界的功夫大量花在召回的多路并行上（协同、向量、热门、社交、地域各一路）。"}, {"id": "ch14-s4", "h": "14.4 13.4 协同过滤的两种形态", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.4 协同过滤的两种形态 13.4 协同过滤的两种形态 **基于用户**：找相似用户，推荐他们喜欢的； **基于物品**：找相似物品，推荐与当前物品相似的。 核心是相似度矩阵。用矩阵分解（SVD/ALS）可以把 m\\times n 的稀疏评分矩阵压成两个低秩矩阵： 这和第 14 章（卷一）的隐语义模型是同一件事。"}, {"id": "ch14-s5", "h": "14.5 13.5 双塔模型：召回的现代主力", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.5 双塔模型：召回的现代主力 13.5 双塔模型：召回的现代主力 用户塔编码用户特征，物品塔编码物品特征，两边输出向量后做内积： 关键优势：物品向量可以离线预计算并建索引，线上只需算用户向量再做近邻检索，毫秒级响应。 训练用负采样 + softmax（in-batch negative 是标配）。注意样本偏差：曝光过的物品才有标签，未曝光的不代表不相关。常用纠偏手段是加上曝光概率的倒数加权。"}, {"id": "ch14-s6", "h": "14.6 13.6 冷启动：三类解法", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.6 冷启动：三类解法 13.6 冷启动：三类解法  类型   问题   解法   ---   ---   ---   新用户   没有行为   用注册信息 + 热门 + 探索策略   新物品   没有交互   用内容特征做向量（图文嵌入）   新场景   没有数据   迁移已有模型 + 人工规则兜底  探索与利用的平衡（EE 问题）是冷启动的理论核心：多探索能发现好内容，但短期指标会掉。常用 Bandit 算法（UCB、Thompson Sampling）来量化这个权衡。"}, {"id": "ch14-s7", "h": "14.7 13.7 评估：离线指标与线上指标经常背离", "k": "s", "s": "13　时间序列与推荐系统", "t": "13.7 评估：离线指标与线上指标经常背离 13.7 评估：离线指标与线上指标经常背离  离线   线上   ---   ---   AUC、NDCG、Recall@k   点击率、转化率、时长、留存  背离的三个原因：离线用的是历史曝光数据（有偏）、离线不看多样性（线上会审美疲劳）、离线不看实时性（线上要求毫秒级）。 结论：离线指标只用来筛方案，最终判断必须靠线上 A/B。"}, {"id": "ch15", "h": "14　判断一个 AI 需求能不能做", "k": "c", "s": "", "t": "这一章给一套可以拿到评审会上用的判断框架。它不承诺准确，但能把\"拍脑袋立项\"变成\"有依据的取舍\"。 14.1 三个前置问题 **错误的代价有多大？** 错了能撤回（草稿、建议）就可以做；错了不可逆（自动打款、自动发药）就需要极高准确率或人工闸门； **有没有可判定的\"对\"？** 有客观标准（测试通过、字段正确）就能做评测；只能\"感觉还行\"就很难迭代； **数据够不够？** 要么有标注数据，要么有可检索的资料，要么有可验证的规则。三者都没有，只能做 demo。 三个问题里有两个答不上来，这个需求就不该现在做。 14.2 四象限：按\"可验证性 × 容错度\"分类  容错高   容错低   ---   ---   ---   可验证   优先做（如代码生成 + 单测、文档格式转换）   可做但要人工复核（如合同条款抽取）   不可验证   谨慎做（如创意文案）   不要做（如医疗诊断、法律意见）  这个矩阵的价值在于：它把\"技术能不能\"换成\"业务敢不敢用\"，而后者才是项目生死的决定因素。 14.3 成本、延迟、准确性：三角只能选两个  组合   代价   ---   ---   高准确 + 低延迟   贵（大模型 + 强硬件 + 大量缓存）   高准确 + 低成本   慢（离线批处理、多轮校验）   低延迟 + 低成本   准确率下降（小模型、量化）  评审时最常见的错误是三个都要。正确做法是明确\"哪个是硬约束\"：交互式产品延迟是硬约束，批处理任务成本是硬约束，合规场景准确性是硬约束。 14.4 需求拆解：把\"智能\"换成\"步骤\" 模糊需求：\"帮我做一个智能合同审查\"。 拆解：  步骤   能否自动化   技术方案   ---   ---   ---   抽取当事人、金额、期限   高   结构化抽取（微调或规则 + LLM 校验）   识别缺失条款   中   规则库 + 检索比对   判断条款风险   低   只能给\"参考意见 + 引用法条\"，需律师复核   生成修改建议   中   模板 + LLM 改写  拆完之后，\"智能审查\"变成了四个可独立交付、独立评估的模块。这一步做完，项目风险下降一半，因为你知道哪部分只能做辅助。 14.5 五个必问的评审问题 **基线是什么？** 现在人工做这件事的准确率与耗时是多少？不比基线好就没有价值； **失败时用户看到什么？** 有没有\"我不知道\"的表达方式； **怎么衡量上线后变好？** 采纳率？修改率？处理时长？ **数据从哪来、能不能用？** 版权、隐私、脱敏； **模型换代时怎么办？** 有没有评测集能验证\"新模型不比旧模型差\"。 这五个问题答不出来，项目即使上线也会在三个月内变成没人维护的技术债。 14.6 什么时候明确说\"不做\" 需要 100% 准确率且错误不可逆； 没有数据、也没法获取（且不能靠规则解决）； 用"}, {"id": "ch15-s1", "h": "15.1 14.1 三个前置问题", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.1 三个前置问题 14.1 三个前置问题 **错误的代价有多大？** 错了能撤回（草稿、建议）就可以做；错了不可逆（自动打款、自动发药）就需要极高准确率或人工闸门； **有没有可判定的\"对\"？** 有客观标准（测试通过、字段正确）就能做评测；只能\"感觉还行\"就很难迭代； **数据够不够？** 要么有标注数据，要么有可检索的资料，要么有可验证的规则。三者都没有，只能做 demo。 三个问题里有两个答不上来，这个需求就不该现在做。"}, {"id": "ch15-s2", "h": "15.2 14.2 四象限：按\"可验证性 × 容错度\"分类", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.2 四象限：按\"可验证性 × 容错度\"分类 14.2 四象限：按\"可验证性 × 容错度\"分类  容错高   容错低   ---   ---   ---   可验证   优先做（如代码生成 + 单测、文档格式转换）   可做但要人工复核（如合同条款抽取）   不可验证   谨慎做（如创意文案）   不要做（如医疗诊断、法律意见）  这个矩阵的价值在于：它把\"技术能不能\"换成\"业务敢不敢用\"，而后者才是项目生死的决定因素。"}, {"id": "ch15-s3", "h": "15.3 14.3 成本、延迟、准确性：三角只能选两个", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.3 成本、延迟、准确性：三角只能选两个 14.3 成本、延迟、准确性：三角只能选两个  组合   代价   ---   ---   高准确 + 低延迟   贵（大模型 + 强硬件 + 大量缓存）   高准确 + 低成本   慢（离线批处理、多轮校验）   低延迟 + 低成本   准确率下降（小模型、量化）  评审时最常见的错误是三个都要。正确做法是明确\"哪个是硬约束\"：交互式产品延迟是硬约束，批处理任务成本是硬约束，合规场景准确性是硬约束。"}, {"id": "ch15-s4", "h": "15.4 14.4 需求拆解：把\"智能\"换成\"步骤\"", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.4 需求拆解：把\"智能\"换成\"步骤\" 14.4 需求拆解：把\"智能\"换成\"步骤\" 模糊需求：\"帮我做一个智能合同审查\"。 拆解：  步骤   能否自动化   技术方案   ---   ---   ---   抽取当事人、金额、期限   高   结构化抽取（微调或规则 + LLM 校验）   识别缺失条款   中   规则库 + 检索比对   判断条款风险   低   只能给\"参考意见 + 引用法条\"，需律师复核   生成修改建议   中   模板 + LLM 改写  拆完之后，\"智能审查\"变成了四个可独立交付、独立评估的模块。这一步做完，项目风险下降一半，因为你知道哪部分只能做辅助。"}, {"id": "ch15-s5", "h": "15.5 14.5 五个必问的评审问题", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.5 五个必问的评审问题 14.5 五个必问的评审问题 **基线是什么？** 现在人工做这件事的准确率与耗时是多少？不比基线好就没有价值； **失败时用户看到什么？** 有没有\"我不知道\"的表达方式； **怎么衡量上线后变好？** 采纳率？修改率？处理时长？ **数据从哪来、能不能用？** 版权、隐私、脱敏； **模型换代时怎么办？** 有没有评测集能验证\"新模型不比旧模型差\"。 这五个问题答不出来，项目即使上线也会在三个月内变成没人维护的技术债。"}, {"id": "ch15-s6", "h": "15.6 14.6 什么时候明确说\"不做\"", "k": "s", "s": "14　判断一个 AI 需求能不能做", "t": "14.6 什么时候明确说\"不做\" 14.6 什么时候明确说\"不做\" 需要 100% 准确率且错误不可逆； 没有数据、也没法获取（且不能靠规则解决）； 用户真正要的是\"省人力\"，而流程本身可以靠信息化直接消除； 收益无法归因（做完也无法证明有价值）； 合规边界不清（尤其涉及个人信息、医疗、金融决策）。 说\"不做\"并给出理由，是产品能力的一部分。"}, {"id": "ch16", "h": "15　数学速查：读论文时最常翻的几页", "k": "c", "s": "", "t": "这一章不做推导，只做索引。推导在卷一。遇到符号看不懂时，先来这里找。 15.1 矩阵求导常用式 分子布局约定（y 为标量，x 为向量，A 为矩阵）：  表达式   结果   ---   ---   y=a^{\\top}x   \\partial y/\\partial x=a   y=x^{\\top}Ax   \\partial y/\\partial x=(A+A^{\\top})x，A 对称时为 2Ax   y=\\ x\\ _2^2   2x   y=\\ Ax-b\\ _2^2   2A^{\\top}(Ax-b)   y=\\log\\det A   A^{-\\top}   y=\\mathrm{tr}(AB)   \\partial y/\\partial A=B^{\\top}  记住这条：\\nabla_x\\|Ax-b\\|^2=2A^{\\top}(Ax-b)。它与最小二乘的正正规方程 A^{\\top}Ax=A^{\\top}b 是同一件事。 15.2 概率分布速查  分布   用途   均值 / 方差   ---   ---   ---   伯努利(p)   二分类标签   p / p(1-p)   分类(p_1..p_k)   多分类   交叉熵的来源   高斯\\mathcal{N}(\\mu,\\sigma^2)   连续值、重参数化   \\mu / \\sigma^2   拉普拉斯   L1 正则的对应分布   尖峰厚尾   狄利克雷   概率单纯形上的分布   主题模型的先验   泊松   计数数据   \\lambda / \\lambda  关键联系：损失函数都有对应的概率解释。MSE ↔ 高斯似然，交叉熵 ↔ 分类似然，L1 ↔ 拉普拉斯先验。看到损失就能反推假设。 15.3 常用不等式  不等式   形式   用途   ---   ---   ---   詹森   f(\\mathbb{E}X)\\le\\mathbb{E}f(X)（f 凸）   变分下界、EM 推导   柯西-施瓦茨   \\ \\langle x,y\\rangle\\ ^2\\le\\ x\\ ^2\\ y\\ ^2   相似度上界   三角不等式   \\ x+y\\ \\le\\ x\\ +\\ y\\    距离性质   切比雪夫   P(\\ X-\\mu\\ \\ge k\\sigma)\\le1/k^2   集中不等式   Hoeffding   有界变量的偏差指数衰减   泛化界   数据处理不等式   I(X;Z)\\ge I(X;Y)（X\\to Y\\to Z）   证明特征不会增加信息  数据处理不等式值得单独理解：任何处理都只会减少信息，不会增加。这解释了为什么\"更好的预处理\"能提效（保留任务相关信息），但不能凭空造出信息。 15.4 信息论四个量 三个必须记住的性质： **KL 不对称**：$D(p\\|q)\\ne D(q\\|p)"}, {"id": "ch16-s1", "h": "16.1 15.1 矩阵求导常用式", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.1 矩阵求导常用式 15.1 矩阵求导常用式 分子布局约定（y 为标量，x 为向量，A 为矩阵）：  表达式   结果   ---   ---   y=a^{\\top}x   \\partial y/\\partial x=a   y=x^{\\top}Ax   \\partial y/\\partial x=(A+A^{\\top})x，A 对称时为 2Ax   y=\\ x\\ _2^2   2x   y=\\ Ax-b\\ _2^2   2A^{\\top}(Ax-b)   y=\\log\\det A   A^{-\\top}   y=\\mathrm{tr}(AB)   \\partial y/\\partial A=B^{\\top}  记住这条：\\nabla_x\\|Ax-b\\|^2=2A^{\\top}(Ax-b)。它与最小二乘的正正规方程 A^{\\top}Ax=A^{\\top}b 是同一件事。"}, {"id": "ch16-s2", "h": "16.2 15.2 概率分布速查", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.2 概率分布速查 15.2 概率分布速查  分布   用途   均值 / 方差   ---   ---   ---   伯努利(p)   二分类标签   p / p(1-p)   分类(p_1..p_k)   多分类   交叉熵的来源   高斯\\mathcal{N}(\\mu,\\sigma^2)   连续值、重参数化   \\mu / \\sigma^2   拉普拉斯   L1 正则的对应分布   尖峰厚尾   狄利克雷   概率单纯形上的分布   主题模型的先验   泊松   计数数据   \\lambda / \\lambda  关键联系：损失函数都有对应的概率解释。MSE ↔ 高斯似然，交叉熵 ↔ 分类似然，L1 ↔ 拉普拉斯先验。看到损失就能反推假设。"}, {"id": "ch16-s3", "h": "16.3 15.3 常用不等式", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.3 常用不等式 15.3 常用不等式  不等式   形式   用途   ---   ---   ---   詹森   f(\\mathbb{E}X)\\le\\mathbb{E}f(X)（f 凸）   变分下界、EM 推导   柯西-施瓦茨   \\ \\langle x,y\\rangle\\ ^2\\le\\ x\\ ^2\\ y\\ ^2   相似度上界   三角不等式   \\ x+y\\ \\le\\ x\\ +\\ y\\    距离性质   切比雪夫   P(\\ X-\\mu\\ \\ge k\\sigma)\\le1/k^2   集中不等式   Hoeffding   有界变量的偏差指数衰减   泛化界   数据处理不等式   I(X;Z)\\ge I(X;Y)（X\\to Y\\to Z）   证明特征不会增加信息  数据处理不等式值得单独理解：任何处理都只会减少信息，不会增加。这解释了为什么\"更好的预处理\"能提效（保留任务相关信息），但不能凭空造出信息。"}, {"id": "ch16-s4", "h": "16.4 15.4 信息论四个量", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.4 信息论四个量 15.4 信息论四个量 三个必须记住的性质： **KL 不对称**：$D(p\\|q)\\ne D(q\\|p)$，所以它不是距离； **KL 非负**，当且仅当两分布相同为 0（由 Jensen 得到）； **互信息对称**：$I(X;Y)=I(Y;X)$，而 KL 不对称。"}, {"id": "ch16-s5", "h": "16.5 15.5 优化里的几个关键词", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.5 优化里的几个关键词 15.5 优化里的几个关键词  词   含义   典型场景   ---   ---   ---   凸函数   局部最优即全局最优   逻辑回归、SVM   强凸   收敛速度有保证   岭回归   Lipschitz 连续   梯度变化有上界   梯度裁剪的依据   鞍点   梯度为 0 但非极值   深层网络、GAN   条件数   最大/最小特征值之比   决定梯度下降快慢  条件数常被忽略：它决定了损失曲面的\"狭长程度\"。条件数大的问题，梯度下降会震荡，这就是为什么需要归一化与自适应优化器。"}, {"id": "ch16-s6", "h": "16.6 15.6 复杂度速查", "k": "s", "s": "15　数学速查：读论文时最常翻的几页", "t": "15.6 复杂度速查 15.6 复杂度速查  操作   时间   空间   ---   ---   ---   矩阵乘 (m\\times k)(k\\times n)   O(mkn)   O(mn)   求逆 n\\times n   O(n^3)   O(n^2)   自注意力（序列 T，维度 d）   O(T^2d)   O(T^2)（未融合）   卷积（核 k，通道 C，输出 H\\times W）   O(HWk^2C^2)   —   排序 n 个元素   O(n\\log n)   —   近邻检索（HNSW）   约 O(\\log n)   O(nM) "}, {"id": "ch17", "h": "16　路线图、项目清单与术语表", "k": "c", "s": "", "t": "16.1 六个月路线（按周排）  阶段   时间   目标   交付物   ---   ---   ---   ---   基础   第 1–4 周   跑通训练流程，理解损失与优化   手写两层 MLP 并训练到收敛   经典   第 5–6 周   会用树集成与特征工程   一个 Kaggle 级别的表格竞赛方案   视觉   第 7–10 周   掌握迁移学习与数据增强   微调一个检测/分类模型并部署   语言   第 11–14 周   理解 Transformer 与大模型使用   一个 RAG 问答系统   工程   第 15–20 周   能上线、能监控、能优化   一个带监控的推理服务   深耕   第 21–24 周   选一个方向做深   一篇技术报告或一个开源贡献  这个节奏的前提是每周至少 10 小时动手。只看不练的进度会打三折。 16.2 七个值得做完的项目 按难度排序，每个都要求\"能跑、能评、能讲\"： **表格竞赛**：泰坦尼克或房价预测，做到特征工程 + 交叉验证 + 模型融合。目的是掌握方法论； **手写数字/垃圾分类**：从零训 CNN，再做量化与 ONNX 部署，测出延迟与精度； **目标检测落地**：用自己的照片训一个小检测模型，做成摄像头实时推理； **文本分类基线对比**：TF-IDF + 线性 vs BERT 微调 vs LLM 零样本，比较精度、延迟、成本； **RAG 问答**：把一批 PDF 做成可问答系统，重点是切分策略与检索质量评估； **微调一个 7B 模型**：LoRA 微调，测显存、吞吐、效果，写出\"什么规模的任务值得微调\"的结论； **推理服务**：把任一模型封装成 C++ 服务，含动态批处理、监控、压测报告。 每个项目都要写一份 README：目标、数据、方法、指标、失败尝试、结论。这份文档比代码更能证明你的能力。 16.3 常见的学习误区 **只收集教程不动手**：AI 的直觉来自调参时看到的反常现象，不是来自阅读； **一上来就学大模型**：没有传统机器学习与深度学习的基础，看 LLM 论文只能记住名词； **追求 SOTA 复现**：复现一篇论文的收益远低于把一个简单模型做到极致； **忽视工程**：真实项目的 80% 工作量在数据、部署、监控； **不看失败案例**：错误分析的收益通常是换模型的三倍。 16.4 术语表  术语   一句话解释   ---   ---   归纳偏置   模型对数据做的先验假设，决定它学得快不快   过拟合 / 欠拟合   记住噪声 / 连规律都没学到   正则化   把先验写进目标函数，限制有效容量   梯度消失 / 爆炸   反向传播连乘导致信号指数衰减 / 放大   残差连接   给梯度开一条系数为 1 的直接路径   归一化（BN/LN）   把每"}, {"id": "ch17-s1", "h": "17.1 16.1 六个月路线（按周排）", "k": "s", "s": "16　路线图、项目清单与术语表", "t": "16.1 六个月路线（按周排） 16.1 六个月路线（按周排）  阶段   时间   目标   交付物   ---   ---   ---   ---   基础   第 1–4 周   跑通训练流程，理解损失与优化   手写两层 MLP 并训练到收敛   经典   第 5–6 周   会用树集成与特征工程   一个 Kaggle 级别的表格竞赛方案   视觉   第 7–10 周   掌握迁移学习与数据增强   微调一个检测/分类模型并部署   语言   第 11–14 周   理解 Transformer 与大模型使用   一个 RAG 问答系统   工程   第 15–20 周   能上线、能监控、能优化   一个带监控的推理服务   深耕   第 21–24 周   选一个方向做深   一篇技术报告或一个开源贡献  这个节奏的前提是每周至少 10 小时动手。只看不练的进度会打三折。"}, {"id": "ch17-s2", "h": "17.2 16.2 七个值得做完的项目", "k": "s", "s": "16　路线图、项目清单与术语表", "t": "16.2 七个值得做完的项目 16.2 七个值得做完的项目 按难度排序，每个都要求\"能跑、能评、能讲\"： **表格竞赛**：泰坦尼克或房价预测，做到特征工程 + 交叉验证 + 模型融合。目的是掌握方法论； **手写数字/垃圾分类**：从零训 CNN，再做量化与 ONNX 部署，测出延迟与精度； **目标检测落地**：用自己的照片训一个小检测模型，做成摄像头实时推理； **文本分类基线对比**：TF-IDF + 线性 vs BERT 微调 vs LLM 零样本，比较精度、延迟、成本； **RAG 问答**：把一批 PDF 做成可问答系统，重点是切分策略与检索质量评估； **微调一个 7B 模型**：LoRA 微调，测显存、吞吐、效果，写出\"什么规模的任务值得微调\"的结论； **推理服务**：把任一模型封装成 C++ 服务，含动态批处理、监控、压测报告。 每个项目都要写一份 README：目标、数据、方法、指标、失败尝试、结论。这份文档比代码更能证明你的能力。"}, {"id": "ch17-s3", "h": "17.3 16.3 常见的学习误区", "k": "s", "s": "16　路线图、项目清单与术语表", "t": "16.3 常见的学习误区 16.3 常见的学习误区 **只收集教程不动手**：AI 的直觉来自调参时看到的反常现象，不是来自阅读； **一上来就学大模型**：没有传统机器学习与深度学习的基础，看 LLM 论文只能记住名词； **追求 SOTA 复现**：复现一篇论文的收益远低于把一个简单模型做到极致； **忽视工程**：真实项目的 80% 工作量在数据、部署、监控； **不看失败案例**：错误分析的收益通常是换模型的三倍。"}, {"id": "ch17-s4", "h": "17.4 16.4 术语表", "k": "s", "s": "16　路线图、项目清单与术语表", "t": "16.4 术语表 16.4 术语表  术语   一句话解释   ---   ---   归纳偏置   模型对数据做的先验假设，决定它学得快不快   过拟合 / 欠拟合   记住噪声 / 连规律都没学到   正则化   把先验写进目标函数，限制有效容量   梯度消失 / 爆炸   反向传播连乘导致信号指数衰减 / 放大   残差连接   给梯度开一条系数为 1 的直接路径   归一化（BN/LN）   把每层输入拉回稳定尺度   注意力   按相似度加权聚合其他位置的信息   位置编码   给注意力补上顺序信息（正弦 / RoPE）   分词器   把文本切成子词并映射为 ID   上下文窗口   模型一次能处理的最大 token 数   温度 / top-p   采样时的锐化与截断参数   嵌入   把离散对象映射为连续向量   向量库   支持近似最近邻检索的索引系统   RAG   先检索资料再让模型作答   微调   在预训练模型上用任务数据继续训练   LoRA   用低秩增量代替全量参数更新   RLHF   用人类偏好训练奖励模型再优化策略   DPO   直接从偏好对优化策略，省掉奖励模型   量化   用低比特表示权重与激活   KV cache   缓存历史键值，避免重复计算   蒸馏   用大模型指导小模型学习   幻觉   生成流畅但与事实不符的内容   对齐   让模型行为符合人类意图与价值观   提示注入   外部内容里藏指令，诱导模型越权   缩放定律   损失随参数、数据、算力增长的幂律关系   混合专家（MoE）   每次只激活部分子网络，扩大容量而不等比例增算力   思维链   让模型先写推理步骤再给答案   智能体   能规划、调用工具、多步执行的系统   评测污染   测试题目出现在训练数据里导致分数虚高   分布偏移   线上数据分布与训练时不同 "}, {"id": "ch17-s5", "h": "17.5 16.5 最后一句", "k": "s", "s": "16　路线图、项目清单与术语表", "t": "16.5 最后一句 16.5 最后一句 学 AI 最有效的路径不是\"读完所有资料再动手\"，而是尽早做出一个能被别人使用的东西，然后被它的失败逼着往回补原理。 卷一给了你往回补的深度，卷三给了往前跑的方法。这一卷的任务只有一件：让你知道什么时候该往哪边走。"}];</script>
+<script src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script>
+/* ============ 工具 ============ */
+function $(s,r){return (r||document).querySelector(s)}
+function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+var C = {
+  ink:function(){return getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#141A1B'},
+  ink3:function(){return getComputedStyle(document.documentElement).getPropertyValue('--ink-3').trim()||'#7E8A8C'},
+  rule:function(){return getComputedStyle(document.documentElement).getPropertyValue('--rule').trim()||'#D9DCD3'},
+  paper:function(){return getComputedStyle(document.documentElement).getPropertyValue('--paper').trim()||'#F2F3EF'},
+  surface:function(){return getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff'},
+  accent:function(){return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#9C3B2E'}
+};
+var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function toast(msg){
+  var t = $('#toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(function(){t.classList.remove('on')},1600);
+}
+function scrollToId(id){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var top = el.getBoundingClientRect().top + window.pageYOffset - 12;
+  window.scrollTo({top:top, behavior: REDUCE ? 'auto' : 'smooth'});
+  if(history.replaceState) history.replaceState(null,'','#'+id);
+}
+
+/* ============ 主题 / 字号 ============ */
+(function(){
+  var root = document.documentElement;
+  var t='light', f='2';
+  try{ t = localStorage.getItem('aitut-theme') || 'light'; f = localStorage.getItem('aitut-font') || '2'; }catch(e){}
+  root.setAttribute('data-theme', t);
+  var SIZES={'1':'16.5px','2':'17.5px','3':'19.5px'};
+  root.style.setProperty('--doc-size', SIZES[f]||SIZES['2']);
+
+  document.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-act]');
+    if(!el) return;
+    var act = el.getAttribute('data-act');
+    if(act==='theme'){
+      var cur = root.getAttribute('data-theme');
+      var next = cur==='dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try{localStorage.setItem('aitut-theme', next);}catch(e){}
+      el.textContent = next==='dark' ? '浅色' : '深色';
+      redrawAll();
+    }
+    if(act==='font'){
+      var order=['1','2','3'], i=order.indexOf(root.getAttribute('data-fs')||f);
+      var nf=order[(i+1)%3];
+      root.setAttribute('data-fs',nf);
+      root.style.setProperty('--doc-size', SIZES[nf]);
+      try{localStorage.setItem('aitut-font', nf);}catch(e){}
+      toast('字号 '+nf+'/3');
+    }
+    if(act==='top'){ window.scrollTo({top:0,behavior:REDUCE?'auto':'smooth'}); }
+    if(act==='rail'){ $('.rail').classList.toggle('open'); }
+    if(act==='railstop'){ $('.rail').classList.remove('open'); }
+    if(act==='copy'){
+      var box = el.closest('.code'), code = box && box.querySelector('pre code');
+      if(!code) return;
+      var text = code.innerText;
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){toast('已复制');},function(){fallbackCopy(text);});
+      } else { fallbackCopy(text); }
+      el.textContent='已复制';
+      setTimeout(function(){el.textContent='复制';},1400);
+    }
+  });
+  function fallbackCopy(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy'); toast('已复制');}catch(e){toast('复制失败，请手动选择');}
+    document.body.removeChild(ta);
+  }
+  root.setAttribute('data-fs', f);
+})();
+
+/* ============ 目录 / 滚动定位 ============ */
+(function(){
+  var links = $all('.ch-link'), subs = $all('.sub-link');
+  var chapters = $all('.chapter');
+  function current(){
+    var y = window.pageYOffset + 140, idx = 0;
+    for(var i=0;i<chapters.length;i++){
+      if(chapters[i].offsetTop <= y) idx = i;
+    }
+    return chapters[idx] ? chapters[idx].id : null;
+  }
+  var raf = null;
+  function update(){
+    var id = current();
+    links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('data-target')===id); });
+    var bar = $('#progressbar'), pct = $('#pct');
+    var h = document.body.scrollHeight - window.innerHeight;
+    var p = h>0 ? Math.min(100, Math.max(0, window.pageYOffset/h*100)) : 0;
+    if(bar) bar.style.width = p.toFixed(1)+'%';
+    if(pct) pct.textContent = Math.round(p)+'%';
+    raf = null;
+  }
+  window.addEventListener('scroll', function(){ if(!raf) raf = requestAnimationFrame(update); }, {passive:true});
+  window.addEventListener('resize', update);
+  links.forEach(function(a){ a.addEventListener('click', function(){ scrollToId(a.getAttribute('data-target')); $('.rail').classList.remove('open'); }); });
+  subs.forEach(function(a){ a.addEventListener('click', function(){ scrollToId(a.getAttribute('data-target')); $('.rail').classList.remove('open'); }); });
+  update();
+})();
+
+/* ============ 全文检索 ============ */
+(function(){
+  var input = $('#q'), panel = $('#searchPanel');
+  if(!input || !panel) return;
+  var IDX = window.__SEARCH__ || [];
+  var timer = null;
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function run(){
+    var q = input.value.trim().toLowerCase();
+    if(q.length < 1){ panel.classList.remove('on'); panel.innerHTML=''; return; }
+    var hits = [];
+    for(var i=0;i<IDX.length && hits.length<14;i++){
+      var item = IDX[i], text = item.t || '';
+      var pos = text.toLowerCase().indexOf(q), hp = item.h.toLowerCase().indexOf(q);
+      if(pos<0 && hp<0) continue;
+      var snip = '';
+      if(pos>=0){ var s=Math.max(0,pos-24); snip = (s>0?'…':'') + text.slice(s,pos+q.length+46) + '…'; }
+      hits.push({h:item.h, s:item.s, id:item.id, snip:snip, title:item.k==='c'});
+    }
+    if(!hits.length){ panel.innerHTML = '<div class="sr-empty">没有匹配「'+esc(input.value)+'」。换个更短的关键词试试。</div>'; panel.classList.add('on'); return; }
+    panel.innerHTML = hits.map(function(x){
+      var mark = x.snip ? x.snip.replace(new RegExp('('+input.value.replace(/[.*+?^$\{\}()|[\]\\\\]/g,'\\$&')+')','ig'),'<b>$1</b>') : '';
+      return '<div class="sr-item" data-go="'+x.id+'"><span class="sr-t">'+esc(x.h)+'</span><span class="sr-x">'+mark+'</span></div>';
+    }).join('');
+    panel.classList.add('on');
+  }
+  input.addEventListener('input', function(){ clearTimeout(timer); timer=setTimeout(run,120); });
+  input.addEventListener('keydown', function(e){
+    if(e.key==='Enter'){ var first = panel.querySelector('.sr-item'); if(first){ scrollToId(first.getAttribute('data-go')); panel.classList.remove('on'); } }
+    if(e.key==='Escape'){ panel.classList.remove('on'); input.blur(); }
+  });
+  panel.addEventListener('click', function(e){
+    var it = e.target.closest('.sr-item'); if(!it) return;
+    scrollToId(it.getAttribute('data-go')); panel.classList.remove('on');
+  });
+  document.addEventListener('click', function(e){ if(!e.target.closest('.search-wrap')) panel.classList.remove('on'); });
+})();
+/* ============ 公式渲染 ============ */
+(function(){
+  function render(){
+    var blocks = $all('.math-block'), inlines = $all('.m-inline');
+    if(!window.katex){
+      blocks.forEach(function(el){ el.textContent = '$$' + el.getAttribute('data-tex') + '$$'; });
+      return;
+    }
+    blocks.forEach(function(el){
+      try{ katex.render(el.getAttribute('data-tex'), el, {displayMode:true, throwOnError:false, strict:false}); }catch(e){}
+    });
+    inlines.forEach(function(el){
+      try{ katex.render(el.getAttribute('data-tex'), el, {displayMode:false, throwOnError:false, strict:false}); }catch(e){}
+    });
+  }
+  if(document.readyState === 'complete'){ render(); }
+  else { window.addEventListener('load', render); }
+})();
+</script>
+<script>
+/* ============ 实验台 ============ */
+var W_REDRAW = [];
+function redrawAll(){ W_REDRAW.forEach(function(f){ try{f();}catch(e){} }); }
+(function(){
+  function setupCanvas(cv, ratio){
+    var cssW = cv.clientWidth || 420;
+    var dpr = Math.min(2, window.devicePixelRatio||1);
+    var cssH = Math.round(cssW * (ratio||0.62));
+    cv.width = Math.round(cssW*dpr); cv.height = Math.round(cssH*dpr);
+    cv.style.height = cssH+'px';
+    var ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx:ctx, w:cssW, h:cssH};
+  }
+
+  /* ---- 1. 梯度下降 ---- */
+  function gradient(el){
+    var cv = el.querySelector('canvas'), lr = el.querySelector('[data-lr]'), out = el.querySelector('[data-lrout]');
+    var read = el.querySelector('[data-read]'), runBtn = el.querySelector('[data-run]'), stepBtn = el.querySelector('[data-step]'), resetBtn = el.querySelector('[data-reset]');
+    var F = function(x,y){ return 0.62*x*x + 1.55*y*y; };
+    var G = function(x,y){ return [1.24*x, 3.10*y]; };
+    var start = [2.35,1.55], p, path, step, running=false, timer=null, view;
+    function reset(){ p = start.slice(); path=[p.slice()]; step=0; draw(); }
+    function doStep(){
+      var g = G(p[0],p[1]), l = parseFloat(lr.value);
+      p = [p[0]-l*g[0], p[1]-l*g[1]];
+      path.push(p.slice()); step++;
+      if(Math.abs(g[0])+Math.abs(g[1]) < 1e-4){ stop(); }
+      if(step>900) stop();
+      draw();
+    }
+    function stop(){ running=false; if(timer){clearInterval(timer);timer=null;} runBtn.textContent='运行'; }
+    function draw(){
+      var s = setupCanvas(cv, 0.66), ctx=s.ctx, w=s.w, h=s.h;
+      var cx=w*0.46, cy=h*0.5, sx=Math.min(w,h*1.5)/6.4;
+      view = {cx:cx, cy:cy, sx:sx};
+      ctx.clearRect(0,0,w,h);
+      var paper=C.paper(); ctx.fillStyle=paper; ctx.fillRect(0,0,w,h);
+      // 等高线
+      for(var k=1;k<=14;k++){
+        var r = k*0.26*sx, rx=r*1.27, ry=r*0.8;
+        ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+        ctx.strokeStyle = k%2===0 ? 'rgba(120,132,120,.30)' : 'rgba(120,132,120,.16)';
+        ctx.lineWidth = k%2===0?1:0.8; ctx.stroke();
+      }
+      // 网格
+      ctx.strokeStyle='rgba(120,132,120,.14)'; ctx.lineWidth=.7;
+      for(var gx=0; gx<=w; gx+=32){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+      for(var gy=0; gy<=h; gy+=32){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+      // 轨迹
+      ctx.beginPath();
+      path.forEach(function(pt,i){
+        var X=cx+pt[0]*sx, Y=cy-pt[1]*sx*1.0;
+        if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+      });
+      ctx.strokeStyle=C.accent(); ctx.lineWidth=1.6; ctx.stroke();
+      // 起点
+      if(path.length){
+        var PX=cx+path[0][0]*sx, PY=cy-path[0][1]*sx;
+        ctx.beginPath(); ctx.arc(PX,PY,2.6,0,Math.PI*2);
+        ctx.strokeStyle=C.ink3(); ctx.lineWidth=1; ctx.stroke();
+      }
+      // 当前点 + 负梯度箭头
+      var X=cx+p[0]*sx, Y=cy-p[1]*sx;
+      var gv=G(p[0],p[1]), n=Math.hypot(gv[0],gv[1])||1;
+      ctx.beginPath(); ctx.moveTo(X,Y); ctx.lineTo(X-gv[0]/n*36*sx/60, Y+gv[1]/n*36*sx/60);
+      ctx.strokeStyle=C.accent(); ctx.lineWidth=2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(X,Y,3.6,0,Math.PI*2); ctx.fillStyle=C.accent(); ctx.fill();
+      // 标注
+      ctx.fillStyle=C.ink3(); ctx.font='11px ui-monospace, Consolas, monospace';
+      ctx.fillText('f(x,y) = 0.62x² + 1.55y²', 12, 20);
+      ctx.fillText('起点 ('+start[0].toFixed(2)+', '+start[1].toFixed(2)+')', 12, h-14);
+      ctx.fillText('当前 ('+p[0].toFixed(3)+', '+p[1].toFixed(3)+')', 12, h-30);
+      if(out) out.textContent = parseFloat(lr.value).toFixed(2);
+      if(read) read.textContent = 'f = '+F(p[0],p[1]).toFixed(4)+'　迭代 '+step;
+    }
+    runBtn.addEventListener('click', function(){
+      if(running){ stop(); return; }
+      running=true; runBtn.textContent='暂停';
+      timer=setInterval(doStep, 90);
+    });
+    stepBtn.addEventListener('click', doStep);
+    resetBtn.addEventListener('click', function(){ stop(); reset(); });
+    lr.addEventListener('input', draw);
+    cv.addEventListener('click', function(e){
+      var r=cv.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+      if(!view) return;
+      var px=(x-view.cx)/view.sx, py=(view.cy-y)/view.sx;
+      if(Math.abs(py)>1.9 || Math.abs(px)>2.9) return;
+      stop(); p=[px,py]; path=[p.slice()]; step=0; draw();
+    });
+    W_REDRAW.push(draw);
+    reset();
+  }
+
+  /* ---- 2. softmax 温度 ---- */
+  function softmax(el){
+    var logits = el.querySelectorAll('[data-logit]'), temp = el.querySelector('[data-temp]'), out=el.querySelector('[data-tout]');
+    var bars = el.querySelector('[data-bars]'), read=el.querySelector('[data-read]');
+    var names = ['A','B','C','D'];
+    function draw(){
+      var T = parseFloat(temp.value), z = [];
+      logits.forEach(function(i){ z.push(parseFloat(i.value)); });
+      out.textContent = T.toFixed(2);
+      var m = Math.max.apply(null, z), ex=[], sum=0;
+      z.forEach(function(v){ var e=Math.exp((v-m)/T); ex.push(e); sum+=e; });
+      var p = ex.map(function(e){ return e/sum; });
+      bars.innerHTML = p.map(function(pi,i){
+        var pct = (pi*100);
+        return '<div style="margin-bottom:.4rem">'+
+          '<div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-2)">'+
+          '<span>'+names[i]+'　logit '+z[i].toFixed(1)+'</span><span>'+(pct<0.1?'&lt;0.1':pct.toFixed(1))+'%</span></div>'+
+          '<div style="height:9px;background:var(--paper-2);position:relative"><i style="position:absolute;inset:0 auto 0 0;width:'+Math.max(0.4,pct.toFixed(1))+'%;background:var(--accent);display:block"></i></div>'+
+          '</div>';
+      }).join('');
+      var H = 0; p.forEach(function(pi){ if(pi>1e-12) H -= pi*Math.log2(pi); });
+      read.textContent = '熵 H(p) = '+H.toFixed(3)+' bit　最大概率 '+Math.max.apply(null,p).toFixed(3);
+    }
+    z_listen: for(var i=0;i<logits.length;i++) logits[i].addEventListener('input',draw);
+    temp.addEventListener('input',draw);
+    W_REDRAW.push(draw);
+    draw();
+  }
+
+  /* ---- 3. 卷积窗口 ---- */
+  function conv(el){
+    var cv=el.querySelector('canvas'), ksel=el.querySelectorAll('[data-k]'), psel=el.querySelectorAll('[data-p]');
+    var read=el.querySelector('[data-read]');
+    var kernels = {
+      edge: [[-1,-1,-1],[0,0,0],[1,1,1]],
+      blur: [[1/9,1/9,1/9],[1/9,1/9,1/9],[1/9,1/9,1/9]],
+      sharpen: [[0,-1,0],[-1,5,-1],[0,-1,0]]
+    };
+    var patterns = {
+      hline: function(r,c){ return (r>=3&&r<=4)?1:0.08; },
+      diag: function(r,c){ return Math.abs(r-c)<=1?1:0.08; },
+      dot: function(r,c){ return (r-3)*(r-3)+(c-3)*(c-3)<=4?1:0.08; },
+      noise: function(r,c){ return ((r*7+c*13)%5)/5*0.6+0.2; }
+    };
+    var N=7, k=1, K=2, pat='hline', ox=1, oy=1;
+    function input(r,c){ return patterns[pat](r,c); }
+    function draw(){
+      var s=setupCanvas(cv,0.44), ctx=s.ctx, w=s.w, h=s.h;
+      ctx.clearRect(0,0,w,h); ctx.fillStyle=C.paper(); ctx.fillRect(0,0,w,h);
+      var pad=10, gap=Math.min(2, w/300);
+      var cw=(w-pad*2)/ (N+N-K+1+N-K+1 + 1.6);
+      var cell=cw;
+      var x0=pad, y0=(h-(N*cell+(N-1)*gap))/2;
+      function grid(x,y,size,fn,highlight){
+        for(var r=0;r<size;r++) for(var c=0;c<size;c++){
+          var v=fn(r,c), X=x+c*(cell+gap), Y=y+r*(cell+gap);
+          ctx.fillStyle='rgba(20,30,32,'+(0.06+v*0.62)+')';
+          ctx.fillRect(X,Y,cell,cell);
+          if(cell>16){
+            ctx.fillStyle=v>0.5?'#fff':C.ink3(); ctx.font='9px ui-monospace,Consolas,monospace';
+            ctx.fillText((typeof v==='number' && isFinite(v))?v.toFixed(1):'', X+2, Y+cell-3);
+          }
+        }
+      }
+      // 输入
+      grid(x0,y0,N,function(r,c){ return input(r,c); });
+      ctx.strokeStyle=C.accent(); ctx.lineWidth=1.5;
+      ctx.strokeRect(x0+oy*(cell+gap)-1, y0+ox*(cell+gap)-1, K*cell+(K-1)*gap+2, K*cell+(K-1)*gap+2);
+      ctx.fillStyle=C.ink3(); ctx.font='10px ui-monospace,Consolas,monospace';
+      ctx.fillText('输入 7×7', x0, h-6);
+      // 卷积核
+      var x1=x0+N*(cell+gap)+16;
+      var kk=kernels[k];
+      for(var r=0;r<K;r++) for(var c=0;c<K;c++){
+        var X=x1+c*(cell+gap), Y=y0+r*(cell+gap), v=kk[r][c];
+        ctx.fillStyle = v>0 ? 'rgba(156,59,46,'+Math.min(.75,v*.7)+')' : (v<0?'rgba(27,74,107,'+Math.min(.75,-v*.6)+')':C.surface());
+        ctx.fillRect(X,Y,cell,cell);
+        if(cell>16){ ctx.fillStyle=C.ink(); ctx.font='9px ui-monospace,Consolas,monospace'; ctx.fillText(v.toFixed(2).replace('-','−'), X+2, Y+cell-3); }
+      }
+      ctx.fillStyle=C.ink3(); ctx.fillText('卷积核 3×3', x1, h-6);
+      // 输出
+      var x2=x1+K*(cell+gap)+18, M=N-K+1;
+      for(var r=0;r<M;r++) for(var c=0;c<M;c++){
+        var sum=0;
+        for(var i=0;i<K;i++) for(var j=0;j<K;j++){ sum += input(r+i, c+j)*kk[i][j]; }
+        var v=Math.max(0,Math.min(1,sum));
+        var X=x2+c*(cell+gap), Y=y0+r*(cell+gap);
+        ctx.fillStyle='rgba(20,30,32,'+(0.05+v*0.7)+')'; ctx.fillRect(X,Y,cell,cell);
+        if(cell>16){ ctx.fillStyle=v>0.5?'#fff':C.ink3(); ctx.font='9px ui-monospace,Consolas,monospace'; ctx.fillText(v.toFixed(1), X+2, Y+cell-3); }
+      }
+      ctx.fillStyle=C.ink3(); ctx.fillText('特征图 5×5', x2, h-6);
+      // 加权和读数
+      var parts=[], sum=0;
+      for(var i2=0;i2<K;i2++) for(var j2=0;j2<K;j2++){
+        var iv=input(oy+i2, ox+j2), kv=kernels[k][i2][j2];
+        sum += iv*kv;
+        if(Math.abs(kv)>0.001) parts.push(iv.toFixed(1)+'×'+kv.toFixed(2).replace('-','−'));
+      }
+      if(read) read.textContent = '窗口左上角 ('+oy+','+ox+') · '+parts.join(' + ')+' = '+sum.toFixed(2);
+    }
+    ksel.forEach(function(b){ b.addEventListener('click', function(){
+      k=b.getAttribute('data-k'); ksel.forEach(function(x){x.style.borderColor='';}); b.style.borderColor='var(--accent)'; draw(); }); });
+    psel.forEach(function(b){ b.addEventListener('click', function(){
+      pat=b.getAttribute('data-p'); psel.forEach(function(x){x.style.borderColor='';}); b.style.borderColor='var(--accent)'; draw(); }); });
+    cv.addEventListener('click', function(e){
+      var r=cv.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+      var pad=10, cell=(cv.clientWidth-pad*2)/(N+N-K+1+N-K+1+1.6), gap=Math.min(2,cv.clientWidth/300);
+      var y0=(cv.clientHeight-(N*cell+(N-1)*gap))/2;
+      var c=Math.floor((x-pad)/(cell+gap)), rr=Math.floor((y-y0)/(cell+gap));
+      if(c>=0&&c<N-K+1&&rr>=0&&rr<N-K+1){ ox=c; oy=rr; draw(); }
+    });
+    W_REDRAW.push(draw);
+    draw();
+  }
+
+  /* ---- 4. 注意力热图 ---- */
+  function attention(el){
+    var toks = ['输入','的','每个','词','都','在','看','所有','词'];
+    var base = [
+      [.42,.10,.08,.06,.10,.06,.06,.06,.06],
+      [.18,.16,.10,.08,.14,.10,.08,.08,.08],
+      [.22,.14,.12,.06,.12,.10,.08,.08,.08],
+      [.16,.10,.26,.08,.10,.10,.06,.06,.08],
+      [.14,.08,.10,.10,.20,.12,.08,.08,.10],
+      [.20,.10,.10,.08,.12,.14,.08,.08,.10],
+      [.16,.12,.10,.08,.14,.12,.12,.06,.10],
+      [.18,.08,.10,.06,.10,.08,.10,.18,.12],
+      [.15,.09,.09,.07,.11,.09,.09,.11,.20]
+    ];
+    var wrap=el.querySelector('[data-heat]'), read=el.querySelector('[data-read]'), causal=false, maskBtn=el.querySelector('[data-mask]');
+    function weights(row){
+      var v = base[row].slice();
+      for(var j=0;j<v.length;j++){ if(causal && j>row) v[j]=0; }
+      var s=0; v.forEach(function(x){s+=x;}); return v.map(function(x){return x/(s||1);});
+    }
+    function draw(){
+      var html='<div style="display:grid;grid-template-columns:2.9rem repeat(9,minmax(0,1fr));gap:2px;font-family:var(--mono);font-size:.62rem">';
+      html+='<div></div>';
+      toks.forEach(function(t){ html+='<div style="writing-mode:vertical-rl;text-orientation:upright;height:3rem;color:var(--ink-3);overflow:hidden">'+t+'</div>'; });
+      toks.forEach(function(row,i){
+        html+='<div style="color:var(--ink-3);display:flex;align-items:center;height:1.55rem">'+row+'</div>';
+        var ws=weights(i);
+        ws.forEach(function(p,j){
+          var a=Math.min(.92, p*2.6);
+          html+='<div data-cell="'+i+','+j+'" title="'+row+'→'+toks[j]+' : '+p.toFixed(3)+'" style="height:1.55rem;background:rgba(156,59,46,'+a.toFixed(3)+');display:flex;align-items:center;justify-content:center;color:'+(a>.45?'#fff':'var(--ink)')+';cursor:pointer">'+(p>0.14?Math.round(p*100):'')+'</div>';
+        });
+      });
+      html+='</div>';
+      wrap.innerHTML=html;
+      wrap.querySelectorAll('[data-cell]').forEach(function(c){
+        c.addEventListener('click', function(){
+          var ij=c.getAttribute('data-cell').split(','), i=+ij[0], ws=weights(i), s=[];
+          ws.forEach(function(p,j){ if(p>0.08) s.push(toks[j]+' '+(p*100).toFixed(0)+'%'); });
+          read.textContent = '「'+toks[i]+'」的注意力分配：'+s.join('，');
+        });
+      });
+      read.textContent = causal ? '因果掩码开启：第 i 行只能看到 j ≤ i 的词。点任一格看该词的分配。' : '点任一格查看该行词的注意力分配。数值为该行百分比。';
+    }
+    maskBtn.addEventListener('click', function(){
+      causal=!causal; maskBtn.textContent = causal?'关闭因果掩码':'开启因果掩码'; draw();
+    });
+    W_REDRAW.push(draw);
+    draw();
+  }
+
+  /* ---- 5. KV cache 显存账本 ---- */
+  function kvcache(el){
+    var inputs = el.querySelectorAll('[data-pt]'), read=el.querySelector('[data-read]'), bars=el.querySelector('[data-bars]');
+    var dt = el.querySelector('[data-dtype]');
+    function val(k){ var i=el.querySelector('[data-pt="'+k+'"]'); return parseFloat(i.value); }
+    function draw(){
+      var L=val('L'), H=val('dim'), S=val('seq'), B=val('b'), bytes = dt.value==='fp16'?2:1;
+      var kvBytes = 2 * L * S * H * B * bytes;          // K 与 V，各 L×S×H
+      var kvGB = kvBytes/Math.pow(1024,3);
+      var wParams = 7e9, wGB = wParams*bytes/Math.pow(1024,3);
+      el.querySelectorAll('[data-out]').forEach(function(o){ o.textContent = Math.round(val(o.getAttribute('data-out'))); });
+      if(!bars) return;
+      var total=kvGB+wGB, kp=kvGB/total*100, wp=wGB/total*100;
+      bars.innerHTML =
+        '<div style="font-family:var(--mono);font-size:.7rem;display:flex;justify-content:space-between"><span>KV cache '+kvGB.toFixed(2)+' GB</span><span>'+kp.toFixed(0)+'%</span></div>'+
+        '<div style="height:14px;background:var(--accent);width:'+kp.toFixed(1)+'%"></div>'+
+        '<div style="font-family:var(--mono);font-size:.7rem;display:flex;justify-content:space-between;margin-top:.5rem"><span>权重（7B, '+(bytes===2?'FP16':'INT8')+'） '+wGB.toFixed(2)+' GB</span><span>'+wp.toFixed(0)+'%</span></div>'+
+        '<div style="height:14px;background:var(--ink-3);width:'+wp.toFixed(1)+'%"></div>';
+      read.textContent = 'KV = 2 × L('+L+') × S('+S+') × H('+H+') × B('+B+') × '+(bytes*8)+'bit = '+kvGB.toFixed(2)+' GB　（batch 为并发序列数）';
+    }
+    inputs.forEach(function(i){ i.addEventListener('input', draw); });
+    dt.addEventListener('change', draw);
+    W_REDRAW.push(draw); draw();
+  }
+
+  /* ---- 6. 多项式拟合：过拟合 ---- */
+  function fitpoly(el){
+    var cv=el.querySelector('canvas'), deg=el.querySelector('[data-deg]'), out=el.querySelector('[data-degout]'), read=el.querySelector('[data-read]');
+    var D = [[0.02,0.55],[0.10,0.72],[0.18,0.62],[0.27,0.95],[0.36,0.80],[0.45,1.22],[0.54,1.02],[0.63,1.15],[0.72,0.98],[0.81,1.02],[0.90,0.86],[0.97,0.80]];
+    function solve(A,b){
+      var n=A.length;
+      for(var i=0;i<n;i++){
+        var piv=i; for(var r=i+1;r<n;r++){ if(Math.abs(A[r][i])>Math.abs(A[piv][i])) piv=r; }
+        var tmp=A[piv]; A[piv]=A[i]; A[i]=tmp; var tb=b[piv]; b[piv]=b[i]; b[i]=tb;
+        if(Math.abs(A[i][i])<1e-12) continue;
+        for(var r2=i+1;r2<n;r2++){
+          var f=A[r2][i]/A[i][i];
+          for(var c=i;c<n;c++) A[r2][c]-=f*A[i][c];
+          b[r2]-=f*b[i];
+        }
+      }
+      var x=new Array(n);
+      for(var i2=n-1;i2>=0;i2--){
+        var s=b[i2]; for(var j=i2+1;j<n;j++) s-=A[i2][j]*x[j];
+        x[i2]= Math.abs(A[i2][i2])<1e-12 ? 0 : s/A[i2][i2];
+      }
+      return x;
+    }
+    function fit(d){
+      var n=d+1, A=[], b=[];
+      for(var i=0;i<n;i++){ A.push(new Array(n).fill(0)); b.push(0); }
+      D.forEach(function(pt){
+        var basis=[]; for(var k=0;k<n;k++) basis.push(Math.pow(pt[0],k));
+        for(var i2=0;i2<n;i2++){ for(var j2=0;j2<n;j2++) A[i2][j2]+=basis[i2]*basis[j2]; b[i2]+=basis[i2]*pt[1]; }
+      });
+      for(var i3=0;i3<n;i3++) A[i3][i3]+= 1e-6;  // 轻微脊正则，稳定高阶病态
+      return solve(A,b);
+    }
+    function draw(){
+      var d=parseInt(deg.value,10); out.textContent=d;
+      var s=setupCanvas(cv,0.52), ctx=s.ctx, w=s.w, h=s.h;
+      ctx.clearRect(0,0,w,h); ctx.fillStyle=C.paper(); ctx.fillRect(0,0,w,h);
+      var padL=30, padR=12, padT=12, padB=24;
+      var X=function(x){ return padL + x*(w-padL-padR); };
+      var Y=function(y){ return h-padB - (y-0.4)/1.1*(h-padT-padB); };
+      ctx.strokeStyle=C.rule(); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,h-padB); ctx.lineTo(w-padR,h-padB); ctx.stroke();
+      ctx.fillStyle=C.ink3(); ctx.font='10px ui-monospace,Consolas,monospace';
+      ctx.fillText('x', w-padR-6, h-padB+14); ctx.fillText('y', padL-6, padT+8);
+      var co=fit(d), train=0;
+      D.forEach(function(pt){
+        var yh=0; for(var k=0;k<co.length;k++) yh+=co[k]*Math.pow(pt[0],k);
+        train += Math.pow(yh-pt[1],2);
+        ctx.strokeStyle=C.rule(); ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(X(pt[0]), Y(pt[1])); ctx.lineTo(X(pt[0]), Y(yh)); ctx.stroke();
+        ctx.beginPath(); ctx.arc(X(pt[0]), Y(pt[1]), 2.6, 0, Math.PI*2); ctx.fillStyle=C.ink(); ctx.fill();
+      });
+      var pts=[];
+      for(var i=0;i<=120;i++){
+        var x=i/120, y=0;
+        for(var k2=0;k2<co.length;k2++) y+=co[k2]*Math.pow(x,k2);
+        pts.push([X(x),Y(Math.max(0.25,Math.min(1.6,y)))]);
+      }
+      ctx.beginPath(); pts.forEach(function(p,i){ i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); });
+      ctx.strokeStyle=C.accent(); ctx.lineWidth=2; ctx.stroke();
+      var rmse=Math.sqrt(train/D.length);
+      read.textContent = '训练 RMSE = '+rmse.toFixed(3)+'　（次数越高，曲线越能穿过每个点，但对新数据的方差越大）';
+    }
+    deg.addEventListener('input', draw);
+    W_REDRAW.push(draw); draw();
+  }
+
+  var MAP = {gradient:gradient, softmax:softmax, conv:conv, attention:attention, kvcache:kvcache, fitpoly:fitpoly};
+  window.__initWidgets = function(){
+    $all('[data-widget]').forEach(function(el){
+      var fn = MAP[el.getAttribute('data-widget')];
+      if(fn){ try{ fn(el); }catch(e){ console.warn(e); } }
+    });
+  };
+})();
+</script>
+<script>window.__initWidgets && window.__initWidgets();</script>
+<script>
+/* ============ 首屏动画 ============ */
+(function(){
+  var cv = document.getElementById('heroCanvas');
+  if(!cv) return;
+  var scene = cv.getAttribute('data-scene');
+  var ctx = cv.getContext('2d'), W=0, H=0, dpr = Math.min(2, window.devicePixelRatio||1);
+  function size(){
+    var r = cv.parentElement.getBoundingClientRect();
+    W = r.width; H = r.height;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    cv.style.width = W+'px'; cv.style.height = H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size(); window.addEventListener('resize', size);
+
+  var t0 = performance.now();
+  function accent(){ return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#9C3B2E'; }
+
+  function drawGradient(t){
+    ctx.clearRect(0,0,W,H);
+    var cx=W*0.68, cy=H*0.46, sx=Math.min(W,H)/5.2;
+    var k;
+    for(k=1;k<=16;k++){
+      var r=k*0.24*sx;
+      ctx.beginPath(); ctx.ellipse(cx,cy,r*1.32,r*0.78,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(237,241,234,'+(0.05+k*0.006)+')'; ctx.lineWidth=1; ctx.stroke();
+    }
+    // 网格
+    ctx.strokeStyle='rgba(237,241,234,.06)';
+    for(k=0;k<W;k+=36){ ctx.beginPath(); ctx.moveTo(k,0); ctx.lineTo(k,H); ctx.stroke(); }
+    for(k=0;k<H;k+=36){ ctx.beginPath(); ctx.moveTo(0,k); ctx.lineTo(W,k); ctx.stroke(); }
+    // 下降轨迹（循环）
+    var p=[2.9,1.9], lr=0.28, path=[p.slice()];
+    for(var i=0;i<160;i++){ p=[p[0]-lr*1.24*p[0], p[1]-lr*3.1*p[1]]; path.push(p.slice()); if(Math.abs(p[0])<0.002&&Math.abs(p[1])<0.002) break; }
+    var T = 6.5, prog = (t % T)/T, idx = Math.min(path.length-1, Math.floor(prog*path.length*1.05));
+    ctx.beginPath();
+    for(var j=0;j<=idx;j++){ var X=cx+path[j][0]*sx, Y=cy-path[j][1]*sx; j?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }
+    ctx.strokeStyle=accent(); ctx.lineWidth=1.4; ctx.globalAlpha=.85; ctx.stroke(); ctx.globalAlpha=1;
+    var q=path[idx], QX=cx+q[0]*sx, QY=cy-q[1]*sx;
+    var g=[1.24*q[0],3.1*q[1]], n=Math.hypot(g[0],g[1])||1, len=40;
+    ctx.beginPath(); ctx.moveTo(QX,QY); ctx.lineTo(QX-g[0]/n*len, QY+g[1]/n*len);
+    ctx.strokeStyle=accent(); ctx.lineWidth=2.2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(QX,QY,4,0,Math.PI*2); ctx.fillStyle=accent(); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx,cy,2.5,0,Math.PI*2); ctx.fillStyle='rgba(237,241,234,.5)'; ctx.fill();
+    ctx.font='11px ui-monospace,Consolas,monospace'; ctx.fillStyle='rgba(237,241,234,.34)';
+    ctx.fillText('θ  ←  θ − η∇L(θ)', 22, H-24);
+    ctx.fillText('f(x,y)=0.62x²+1.55y²', cx-sx*2.4, cy+sx*1.5);
+  }
+
+  function drawMap(t){
+    ctx.clearRect(0,0,W,H);
+    var nodes=[
+      {x:.72,y:.16,l:'数学'},
+      {x:.55,y:.34,l:'机器学习'},
+      {x:.78,y:.42,l:'深度学习'},
+      {x:.86,y:.66,l:'大模型'},
+      {x:.62,y:.66,l:'强化学习'},
+      {x:.44,y:.56,l:'工程部署'},
+      {x:.70,y:.86,l:'应用与智能体'}
+    ];
+    var edges=[[0,1],[1,2],[2,3],[1,4],[1,5],[5,3],[3,6],[4,6],[5,6],[2,5]];
+    var cx=W*0.72, cy=H*0.52;
+    edges.forEach(function(e,ei){
+      var a=nodes[e[0]], b=nodes[e[1]];
+      var ax=a.x*W*0.8+W*0.1, ay=a.y*H, bx=b.x*W*0.8+W*0.1, by=b.y*H;
+      ctx.beginPath(); ctx.moveTo(ax,ay);
+      ctx.quadraticCurveTo((ax+bx)/2+(ei%2?12:-12),(ay+by)/2, bx,by);
+      ctx.strokeStyle='rgba(237,241,234,.16)'; ctx.lineWidth=1; ctx.stroke();
+      var ph=((t/4)+ei/edges.length)%1, tt=ph;
+      var px=(1-tt)*(1-tt)*ax+2*(1-tt)*tt*((ax+bx)/2+(ei%2?12:-12))+tt*tt*bx;
+      var py=(1-tt)*(1-tt)*ay+2*(1-tt)*tt*((ay+by)/2)+tt*tt*by;
+      ctx.beginPath(); ctx.arc(px,py,2.2,0,Math.PI*2); ctx.fillStyle=accent(); ctx.globalAlpha=.8; ctx.fill(); ctx.globalAlpha=1;
+    });
+    nodes.forEach(function(nd,i){
+      var x=nd.x*W*0.8+W*0.1, y=nd.y*H;
+      var pull=Math.sin(t/2.4+i)*1.6;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.strokeStyle='rgba(237,241,234,.05)'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x,y,3.5+pull,0,Math.PI*2); ctx.fillStyle=i===3?accent():'rgba(237,241,234,.55)'; ctx.fill();
+      ctx.font='11px ui-monospace,Consolas,monospace'; ctx.fillStyle='rgba(237,241,234,.42)';
+      ctx.fillText(nd.l, x+9, y+4);
+    });
+    ctx.font='10px ui-monospace,Consolas,monospace'; ctx.fillStyle='rgba(237,241,234,.26)';
+    ctx.fillText('知识不是一条直线，而是互相引用的网', W*0.5, H-22);
+  }
+
+  function drawStream(t){
+    ctx.clearRect(0,0,W,H);
+    var toks=['<','B','O','S','>','深','度','学','习','的','本','质','是','函','数','逼','近'];
+    var y0=H*0.42, x0=W*0.5, gap=Math.min(46, (W*0.46)/toks.length);
+    ctx.font='11px ui-monospace,Consolas,monospace';
+    toks.forEach(function(tk,i){
+      var ph=(t/7 - i*0.06)%1; if(ph<0) ph+=1;
+      var x=x0+i*gap, y=y0 + Math.sin(ph*Math.PI*2)*3;
+      var a = ph<0.75 ? 0.85 : 0.85-(ph-0.75)*2.8;
+      ctx.globalAlpha=Math.max(.12,a);
+      ctx.strokeStyle='rgba(237,241,234,.3)'; ctx.strokeRect(x,y-13,Math.max(16,ctx.measureText(tk).width+8),20);
+      ctx.fillStyle='rgba(237,241,234,.8)'; ctx.fillText(tk,x+4,y+2);
+      ctx.globalAlpha=1;
+    });
+    // 注意力矩阵
+    var n=7, cell=Math.min(26, W/26), mx=W*0.68, my=H*0.1;
+    for(var i=0;i<n;i++) for(var j=0;j<n;j++){
+      var wgt = (j<=i? (0.15+0.3*Math.abs(Math.sin(i*0.7+j*0.4+t*0.25))) : 0.03);
+      ctx.fillStyle='rgba(156,59,46,'+wgt.toFixed(3)+')';
+      ctx.fillRect(mx+j*(cell+2), my+i*(cell+2), cell, cell);
+    }
+    ctx.strokeStyle='rgba(237,241,234,.18)';
+    ctx.strokeRect(mx-1, my-1, n*(cell+2)+1, n*(cell+2)+1);
+    ctx.fillStyle='rgba(237,241,234,.32)';
+    ctx.fillText('attention: 每个位置看到哪些位置', mx-2, my+n*(cell+2)+18);
+    // 光束
+    var beamX = mx-20 + Math.sin(t*0.6)*8;
+    ctx.beginPath(); ctx.moveTo(x0+toks.length*gap, y0); ctx.lineTo(beamX, my+n*cell/2);
+    ctx.strokeStyle='rgba(156,59,46,.35)'; ctx.lineWidth=1.2; ctx.stroke();
+  }
+
+  var DRAW = {gradient:drawGradient, map:drawMap, stream:drawStream}[scene] || drawGradient;
+  if(REDUCE){ DRAW(3.2); return; }
+  function loop(now){
+    DRAW((now-t0)/1000);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden){ t0 = performance.now(); } });
+})();
+</script>
+<script>
+/* ============ 章末动作 ============ */
+(function(){
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-fold]');
+    if(!b) return;
+    var box = document.getElementById(b.getAttribute('data-fold'));
+    if(!box) return;
+    var on = box.hasAttribute('hidden');
+    if(on){ box.removeAttribute('hidden'); b.textContent='收起答案'; }
+    else { box.setAttribute('hidden',''); b.textContent='看答案'; }
+  });
+})();
+</script>
+</body>
+</html>
